@@ -1,1 +1,3 @@
 # VoiceDrone
+- training
+- inference
