@@ -15,6 +15,7 @@ import torchnet
 from datasets import *
 from transforms import *
 import models
+import numpy as np
 
 n_mels = 32
 model = models.create_model(model_name='vgg19_bn', num_classes=len(CLASSES),in_channels=1)
@@ -44,6 +45,13 @@ def fix_audio_length(samples):
             samples = np.pad(samples, (0, length - len(samples)), "constant")
         return samples
 
+def softmax(a):
+    c = np.max(a)
+    exp_a = np.exp(a - c)
+    sum_exp_a = np.sum(exp_a)
+    y = exp_a / sum_exp_a
+    return y
+
 class Audio(BaseModel):
     audio: str
 
@@ -64,4 +72,9 @@ def recognize(audio: Audio):
     model.eval()
     output = model(data.float())
     amax = torch.argmax(output)
-    return CLASSES[amax]  
+    prob = softmax(output.detach().numpy()[0]).astype(np.float)
+    prob = dict(zip(CLASSES, prob))
+    return {
+        "result": CLASSES[amax],
+        "prob":prob
+    }
