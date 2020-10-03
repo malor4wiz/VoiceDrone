@@ -6,6 +6,8 @@ CPUでの動作を想定しています。
 - training: 学習しモデルファイルを保存
 - inference: モデルファイルを読み込み、WebAPIを提供
 
+※ファイルサイズが大きい（音声、学習済みモデル合わせて数百MB）ため、cloneに時間がかかる場合があります
+
 ## training
 
 `python3 train_speech_commands.py --model=vgg19_bn --optim=sgd --lr-scheduler=plateau --learning-rate=0.01 --lr-scheduler-patience=5 --max-epochs=3 --batch-size=96`
