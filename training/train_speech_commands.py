@@ -1,8 +1,3 @@
-#!/usr/bin/env python
-"""Train a CNN for Google speech commands."""
-
-__author__ = 'Yuan Xu, Erdene-Ochir Tuguldur'
-
 import argparse
 import time
 
@@ -16,7 +11,6 @@ from torch.utils.data.sampler import WeightedRandomSampler
 import torchvision
 from torchvision.transforms import *
 
-from tensorboardX import SummaryWriter
 
 import models
 from datasets import *
@@ -123,14 +117,12 @@ else:
 def get_lr():
     return optimizer.param_groups[0]['lr']
 
-writer = SummaryWriter(comment=('_speech_commands_' + full_name))
 
 def train(epoch):
     global global_step
 
     print("epoch %3d with lr=%.02e" % (epoch, get_lr()))
     phase = 'train'
-    writer.add_scalar('%s/learning_rate' % phase,  get_lr(), epoch)
 
     model.train()  # Set model to training mode
 
@@ -153,7 +145,7 @@ def train(epoch):
 
         if use_gpu:
             inputs = inputs.cuda()
-            targets = targets.cuda(async=True)
+            targets = targets.cuda(non_blocking=True)
 
         # forward/backward
         outputs = model(inputs)
@@ -173,23 +165,20 @@ def train(epoch):
         pred = outputs.data.max(1, keepdim=True)[1]
         if args.mixup:
             targets = batch['target']
-            targets = Variable(targets, requires_grad=False).cuda(async=True)
+            targets = Variable(targets, requires_grad=False).cuda(non_blocking=True)
         correct += pred.eq(targets.data.view_as(pred)).sum()
         total += targets.size(0)
 
-        #writer.add_scalar('%s/loss' % phase, loss.data[0], global_step)
-        writer.add_scalar('%s/loss' % phase, loss.data.item(), global_step)
 
         # update the progress bar
         pbar.set_postfix({
             'loss': "%.05f" % (running_loss / it),
-            'acc': "%.02f%%" % (100*correct/total)
+            'acc': "%.02f%%" % (100*correct//total)
         })
 
-    accuracy = correct/total
+    accuracy = correct//total
     epoch_loss = running_loss / it
-    writer.add_scalar('%s/accuracy' % phase, 100*accuracy, epoch)
-    writer.add_scalar('%s/epoch_loss' % phase, epoch_loss, epoch)
+
 
 def valid(epoch):
     global best_accuracy, best_loss, global_step
@@ -213,7 +202,7 @@ def valid(epoch):
 
         if use_gpu:
             inputs = inputs.cuda()
-            targets = targets.cuda(async=True)
+            targets = targets.cuda(non_blocking=True)
 
         # forward
         outputs = model(inputs)
@@ -228,19 +217,17 @@ def valid(epoch):
         correct += pred.eq(targets.data.view_as(pred)).sum()
         total += targets.size(0)
 
-        #writer.add_scalar('%s/loss' % phase, loss.data[0], global_step)
-        writer.add_scalar('%s/loss' % phase, loss.data.item(), global_step)
+
 
         # update the progress bar
         pbar.set_postfix({
             'loss': "%.05f" % (running_loss / it),
-            'acc': "%.02f%%" % (100*correct/total)
+            'acc': "%.02f%%" % (100*correct//total)
         })
 
-    accuracy = correct/total
+    accuracy = correct//total
     epoch_loss = running_loss / it
-    writer.add_scalar('%s/accuracy' % phase, 100*accuracy, epoch)
-    writer.add_scalar('%s/epoch_loss' % phase, epoch_loss, epoch)
+
 
     checkpoint = {
         'epoch': epoch,
