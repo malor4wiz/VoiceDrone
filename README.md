@@ -12,6 +12,15 @@ CPUでの動作を想定しています。
 
 ## inference
 
+### server
+
+#### 直接実行
 `/server`で`uvicorn main:app --port [PORT]`を実行
 
+#### コンテナ実行
+- `inference`に移動
+- docker build . -t voice-drone-inference
+- sudo docker run -p [PORT]:80  voice-drone-inference
+
+### client
 `/client`で`python3 client.py --url http://localhost:[PORT]/speech`を実行
