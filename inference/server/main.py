@@ -1,5 +1,5 @@
 from typing import Optional
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import base64
 import argparse
@@ -16,7 +16,7 @@ from datasets import *
 from transforms import *
 import models
 import numpy as np
-
+ 
 n_mels = 32
 model = models.create_model(model_name='vgg19_bn', num_classes=len(CLASSES),in_channels=1)
 model.load_state_dict(torch.load('model.pth')['state_dict'])
@@ -62,7 +62,10 @@ def read_root():
 @app.post("/speech")
 def recognize(audio: Audio):
     b = base64.b64decode(audio.audio)
-    data = librosa.util.buf_to_float(b)
+    try:
+        data = librosa.util.buf_to_float(b)
+    except:
+        raise HTTPException(status_code=400, detail="Data length is Invalid.")
     data = fix_audio_length(data)
     data = to_melspectrogram(data, n_mels=n_mels)
     data = data.reshape(1,1,n_mels,n_mels)
