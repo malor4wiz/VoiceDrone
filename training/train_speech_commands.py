@@ -20,7 +20,6 @@ parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.A
 parser.add_argument("--train-dataset", type=str, default='datasets/speech_commands/train', help='path of train dataset')
 parser.add_argument("--valid-dataset", type=str, default='datasets/speech_commands/valid', help='path of validation dataset')
 parser.add_argument("--background-noise", type=str, default='datasets/speech_commands/train/_background_noise_', help='path of background noise')
-parser.add_argument("--comment", type=str, default='', help='comment in tensorboard title')
 parser.add_argument("--batch-size", type=int, default=128, help='batch size')
 parser.add_argument("--dataload-workers-nums", type=int, default=6, help='number of workers for dataloader')
 parser.add_argument("--weight-decay", type=float, default=1e-2, help='weight decay')
@@ -31,9 +30,7 @@ parser.add_argument("--lr-scheduler-patience", type=int, default=5, help='lr sch
 parser.add_argument("--lr-scheduler-step-size", type=int, default=50, help='lr scheduler step: number of epochs of learning rate decay.')
 parser.add_argument("--lr-scheduler-gamma", type=float, default=0.1, help='learning rate is multiplied by the gamma to decrease it')
 parser.add_argument("--max-epochs", type=int, default=70, help='max number of epochs')
-parser.add_argument("--resume", type=str, help='checkpoint file to resume')
 parser.add_argument("--model", choices=models.available_models, default=models.available_models[0], help='model of NN')
-parser.add_argument("--input", choices=['mel32'], default='mel32', help='input of NN')
 
 args = parser.parse_args()
 
@@ -43,8 +40,6 @@ if use_gpu:
     torch.backends.cudnn.benchmark = True
 
 n_mels = 32
-if args.input == 'mel40':
-    n_mels = 40
 
 data_aug_transform = Compose([ChangeAmplitude(), ChangeSpeedAndPitchAudio(), FixAudioLength(), ToSTFT(), StretchAudioOnSTFT(), TimeshiftAudioOnSTFT(), FixSTFTDimension()])
 bg_dataset = BackgroundNoiseDataset(args.background_noise, data_aug_transform)
@@ -72,8 +67,6 @@ valid_dataloader = DataLoader(valid_dataset, batch_size=args.batch_size, shuffle
 
 # a name used to save checkpoints etc.
 full_name = '%s_%s_%s_bs%d_lr%.1e_wd%.1e' % (args.model, args.optim, args.lr_scheduler, args.batch_size, args.learning_rate, args.weight_decay)
-if args.comment:
-    full_name = '%s_%s' % (full_name, args.comment)
 
 model = models.create_model(model_name=args.model, num_classes=len(CLASSES), in_channels=1)
 print(CLASSES)
@@ -95,19 +88,6 @@ best_accuracy = 0
 best_loss = 1e100
 global_step = 0
 
-if args.resume:
-    print("resuming a checkpoint '%s'" % args.resume)
-    checkpoint = torch.load(args.resume)
-    model.load_state_dict(checkpoint['state_dict'])
-    model.float()
-    optimizer.load_state_dict(checkpoint['optimizer'])
-
-    best_accuracy = checkpoint.get('accuracy', best_accuracy)
-    best_loss = checkpoint.get('loss', best_loss)
-    start_epoch = checkpoint.get('epoch', start_epoch)
-    global_step = checkpoint.get('step', global_step)
-
-    del checkpoint  # reduce memory
 
 if args.lr_scheduler == 'plateau':
     lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=args.lr_scheduler_patience, factor=args.lr_scheduler_gamma)
