@@ -7,7 +7,7 @@
     android:layout_height="match_parent">
 
     <TextView
-        android:id="@+id/okLabel"
+        android:id="@+id/connectionLabel"
         android:layout_width="50dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="40dp"
@@ -25,7 +25,7 @@
         android:layout_marginTop="28dp"
         android:text="0%"
         android:textAlignment="center"
-        app:layout_constraintStart_toEndOf="@+id/okLabel"
+        app:layout_constraintStart_toEndOf="@+id/connectionLabel"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView

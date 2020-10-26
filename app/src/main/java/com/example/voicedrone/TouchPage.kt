@@ -7,9 +7,14 @@ import android.os.AsyncTask
 import android.util.Log
 import android.view.View
 import android.widget.Button
+import android.widget.TextView
+import kotlinx.android.synthetic.main.touch_page.*
 
 class TouchPage : AppCompatActivity() {
-    private var connectTello : ConnectTello? = null
+    private var tello : KTello? = null
+    private var connectionLabel: TextView? = null
+    private var batteryLabel: TextView? = null
+    private var timeLabel: TextView? = null
 
     val MOVEMENT_RANGE = 20
 
@@ -17,121 +22,129 @@ class TouchPage : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.touch_page)
 
-        val takeoffBtn = findViewById<Button>(R.id.takeoffBtn)
+        connectionLabel = findViewById(R.id.connectButton)
+        batteryLabel = findViewById(R.id.batteryLabel)
+        timeLabel = findViewById(R.id.timeLabel)
 
-        val landBtn = findViewById<Button>(R.id.landBtn)
+        tello = KTello()
 
-        connectTello = ConnectTello(takeoffBtn, landBtn)
+        Thread{
+            tello?.connect()
+        }.start()
 
-        connectTello!!.execute()
+        Thread{
+            askTello()
+        }.start()
+    }
+
+    private fun askTello(){
+        while (true){
+            var isConnected: String? = "No"
+            var battery: String? = "0%"
+            var time: String? = "0s"
+
+            Thread{
+                if (tello?.isConnected!!){
+                    isConnected = "OK"
+                }
+            }.start()
+
+            connectionLabel?.text = isConnected
+
+            Thread.sleep(500)
+
+            Thread{
+                battery = tello?.battery
+            }.start()
+
+            batteryLabel?.text = battery
+
+            Thread.sleep(500)
+
+            Thread{
+                time = tello?.time
+            }.start()
+
+            timeLabel?.text = time
+
+            Thread.sleep(500)
+        }
     }
 
     fun takeoffBtnClicked(view: View?) {
         Log.w("takeoffBtnClicked", "View")
-        connectTello?.takeoffBtnClicked()
-//        tello?.takeOff()
+        Thread{
+            tello?.takeOff()
+        }.start()
     }
 
     fun landBtnClicked(view: View?) {
         Log.w("landBtnClicked", "View")
-        connectTello?.landBtnClicked()
-//        tello?.land()
+        Thread{
+            tello?.land()
+        }.start()
     }
 
-//    fun endBtnClicked(view: View?) {
-////        Log.w("BtnClicked", "View")
-////        connectTello.landBtnClicked()
-////        tello?.close()
-//    }
-//
-//    fun upBtnClicked(view: View?) {
-////        tello?.up(MOVEMENT_RANGE)
-//    }
-//
-//    fun ccwBtnClicked(view: View?) {
-////        tello?.ccw(MOVEMENT_RANGE)
-//    }
-//
-//    fun downBtnClicked(view: View?) {
-////        tello?.down(MOVEMENT_RANGE)
-//    }
-//
-//    fun cwBtnClicked(view: View?) {
-////        tello?.cw(MOVEMENT_RANGE)
-//    }
-//
-//    fun forwardBtnClicked(view: View?) {
-////        tello?.forward(MOVEMENT_RANGE)
-//    }
-//
-//    fun leftBtnClicked(view: View?) {
-////        tello?.left(MOVEMENT_RANGE)
-//    }
-//
-//    fun backBtnClicked(view: View?) {
-////        tello?.back(MOVEMENT_RANGE)
-//    }
-//
-//    fun rightBtnClicked(view: View?) {
-////        tello?.right(MOVEMENT_RANGE)
-//    }
+    fun endBtnClicked(view: View?) {
+        Log.w("endBtnClicked", "View")
+        Thread{
+            tello?.close()
+        }.start()
+    }
 
-    inner class ConnectTello : AsyncTask<String, Void, String> {
-        private var takeoffBtn: Button? = null
-        private var landBtn: Button? = null
+    fun upBtnClicked(view: View?) {
+        Log.i("upBtnClicked", "View")
+        Thread{
+            tello?.up(MOVEMENT_RANGE)
+        }.start()
+    }
 
+    fun ccwBtnClicked(view: View?) {
+        Log.i("ccwBtnClicked", "View")
+        Thread{
+            tello?.ccw(MOVEMENT_RANGE)
+        }.start()
+    }
 
-        private var tello: KTello? = null
-        private var flags = mapOf(
-            "takeoff" to false,
-            "land" to false
-        )
+    fun downBtnClicked(view: View?) {
+        Log.i("downBtnClicked", "View")
+        Thread{
+            tello?.down(MOVEMENT_RANGE)
+        }.start()
+    }
 
-        constructor(takeoffBtn: Button, landBtn: Button) {
-            this.takeoffBtn = takeoffBtn
-            this.landBtn = landBtn
-        }
+    fun cwBtnClicked(view: View?) {
+        Log.i("cwBtnClicked", "View")
+        Thread{
+            tello?.cw(MOVEMENT_RANGE)
+        }.start()
+    }
 
-        override fun doInBackground(vararg params: String): String? {
-            tello = KTello()
-            tello?.connect()
+    fun forwardBtnClicked(view: View?) {
+        Log.i("forwardBtnClicked", "View")
+        Thread{
+            tello?.forward(MOVEMENT_RANGE)
+        }.start()
+    }
 
-//            takeoffBtn?.setOnClickListener { view ->
-//                Log.w("takeoffBtnClicked", "Async")
-//                tello?.takeOff()
-//            }
-//
-//            landBtn?.setOnClickListener { view ->
-//                Log.w("BtnClicked", "Async")
-//                tello?.land()
-//            }
+    fun leftBtnClicked(view: View?) {
+        Log.i("leftBtnClicked", "View")
+        Thread{
+            tello?.left(MOVEMENT_RANGE)
+        }.start()
+    }
 
+    fun backBtnClicked(view: View?) {
+        Log.i("backBtnClicked", "View")
+        Thread{
+            tello?.back(MOVEMENT_RANGE)
+        }.start()
+    }
 
-
-            return ""
-        }
-
-        override fun onPostExecute(string: String?) {
-        }
-
-        fun takeoffBtnClicked() {
-            Log.w("takeoffBtnClicked", "Async")
-            val t = Thread {
-                Log.w("takeoffBtnClicked", "Async")
-                tello?.takeOff()
-            }
-            t.start()
-//            if (!(flags["takeoff"] ?: error("non flag"))){
-//                tello?.takeOff()
-//            }
-        }
-
-        fun landBtnClicked() {
-            val t = Thread{
-                Log.w("landBtnClicked", "Async")
-                tello?.land()
-            }
-            t.start()
-        }
+    fun rightBtnClicked(view: View?) {
+        Log.i("rightBtnClicked", "View")
+        Thread{
+            tello?.right(MOVEMENT_RANGE)
+        }.start()
     }
 }
