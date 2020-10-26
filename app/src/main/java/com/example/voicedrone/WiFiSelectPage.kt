@@ -19,11 +19,9 @@ import android.widget.Button
 import android.widget.ListView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import java.util.*
-import kotlin.collections.ArrayList
 
 
-class MainActivity : AppCompatActivity() {
+class WiFiSelectPage : AppCompatActivity() {
     private val PERMISSIONS_REQUEST_CODE_ACCESS_COARSE_LOCATION = 0
     private var wifis = arrayOf<String>()
     private var adapter : ArrayAdapter<String>? = null
@@ -32,7 +30,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.wifi_select_page)
 
         var manager : WifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
         val info : WifiInfo = manager.connectionInfo
@@ -109,9 +107,11 @@ class MainActivity : AppCompatActivity() {
 
         val connectButton = findViewById<Button>(R.id.connectButton)
         connectButton.setOnClickListener { _ ->
-            Log.w("connectionButton", "Clicked")
-            val connection = Connection(this, internetWiFi?.text.toString(), "326824658235a")
-            connection.invoke()
+            val intent = Intent(application, RecordPage::class.java)
+            startActivity(intent)
+//            Log.w("connectionButton", "Clicked")
+//            val connection = Connection(this, internetWiFi?.text.toString(), "326824658235a")
+//            connection.invoke()
         }
     }
 

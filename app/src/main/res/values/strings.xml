@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">VoiceDrone</string>
+    <string name="voice_order">VoiceOrder</string>
+    <string name="touch_order">TouchOrder</string>
 </resources>

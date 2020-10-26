@@ -11,10 +11,7 @@ import android.net.wifi.WifiConfiguration
 import android.net.wifi.WifiManager
 import android.os.Build
 import android.util.Log
-import io.reactivex.rxjava3.core.Completable
-import io.reactivex.rxjava3.core.CompletableEmitter
 import io.reactivex.rxjava3.core.Single
-import java.util.concurrent.TimeUnit
 
 class Connection(private val context: Context, private val wifiSSID: String, private val wifiPassword: String) {
 
@@ -46,17 +43,17 @@ class Connection(private val context: Context, private val wifiSSID: String, pri
         addNetwork()
     }
 
-    private fun initNetwork(): Single<Network> {
-        Log.v("v","Initializing network...")
-        return Single.just(connectivityManager.allNetworks.find {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                connectivityManager.getNetworkCapabilities(it)
-                    .hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
-            } else {
-                connectivityManager.getNetworkInfo(it).extraInfo == wifiSSID
-            }
-        })
-    }
+//    private fun initNetwork(): Single<Network> {
+//        Log.v("v","Initializing network...")
+//        return Single.just(connectivityManager.allNetworks.find {
+//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//                connectivityManager.getNetworkCapabilities(it)
+//                    .hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
+//            } else {
+//                connectivityManager.getNetworkInfo(it).extraInfo == wifiSSID
+//            }
+//        })
+//    }
 
     private fun addNetwork() {
         Log.v("v","Connecting to ${wifiSSID}...")
