@@ -24,7 +24,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".WiFiSelectPage" />
+        <activity android:name=".WiFiSelectPage"
+            android:windowSoftInputMode="adjustPan"/>
         <activity android:name=".RecordPage" />
         <activity android:name=".TouchPage"
             android:screenOrientation="landscape"
