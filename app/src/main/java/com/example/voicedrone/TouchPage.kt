@@ -1,14 +1,15 @@
 package com.example.voicedrone
 
-import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
 import KTello
-import android.os.AsyncTask
+import android.os.Bundle
+import android.os.Handler
 import android.util.Log
 import android.view.View
-import android.widget.Button
 import android.widget.TextView
-import kotlinx.android.synthetic.main.touch_page.*
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import java.lang.Exception
+
 
 class TouchPage : AppCompatActivity() {
     private var tello : KTello? = null
@@ -16,135 +17,161 @@ class TouchPage : AppCompatActivity() {
     private var batteryLabel: TextView? = null
     private var timeLabel: TextView? = null
 
+    private var askFlag = true
+
     val MOVEMENT_RANGE = 20
+
+    enum class TelloActions{
+        TAKEOFF,
+        LAND,
+        END,
+        UP,
+        DOWN,
+        CW,
+        CCW,
+        FORWARD,
+        BACK,
+        RIGHT,
+        LEFT
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.touch_page)
 
-        connectionLabel = findViewById(R.id.connectButton)
+        connectionLabel = findViewById(R.id.connectionLabel)
         batteryLabel = findViewById(R.id.batteryLabel)
         timeLabel = findViewById(R.id.timeLabel)
 
         tello = KTello()
 
         Thread{
-            tello?.connect()
-        }.start()
-
-        Thread{
-            askTello()
+            try {
+                tello?.connect()
+            } catch (e: Exception) {
+                print(e)
+            }
+            if (tello?.isConnected!!) {
+                runOnUiThread {
+                    connectionLabel?.text = "OK"
+                }
+                askTello()
+            }
         }.start()
     }
 
     private fun askTello(){
-        while (true){
-            var isConnected: String? = "No"
-            var battery: String? = "0%"
-            var time: String? = "0s"
+        while (askFlag){
+            try {
+                val battery: String? = tello?.battery + "%"
 
-            Thread{
-                if (tello?.isConnected!!){
-                    isConnected = "OK"
+                runOnUiThread{
+                    if (battery != "ok") {
+                        batteryLabel?.text = battery
+                    }
                 }
-            }.start()
 
-            connectionLabel?.text = isConnected
+                Thread.sleep(500)
 
-            Thread.sleep(500)
+                val time: String? = tello?.time
 
-            Thread{
-                battery = tello?.battery
-            }.start()
+                runOnUiThread{
+                    if (battery != "ok") {
+                        timeLabel?.text = time
+                    }
+                }
 
-            batteryLabel?.text = battery
-
-            Thread.sleep(500)
-
-            Thread{
-                time = tello?.time
-            }.start()
-
-            timeLabel?.text = time
-
-            Thread.sleep(500)
+                Thread.sleep(500)
+            } catch (e: Exception) {
+                print(e)
+            }
         }
     }
 
     fun takeoffBtnClicked(view: View?) {
         Log.w("takeoffBtnClicked", "View")
-        Thread{
-            tello?.takeOff()
-        }.start()
+        telloAction(TelloActions.TAKEOFF)
     }
 
     fun landBtnClicked(view: View?) {
         Log.w("landBtnClicked", "View")
-        Thread{
-            tello?.land()
-        }.start()
+        telloAction(TelloActions.LAND)
     }
 
     fun endBtnClicked(view: View?) {
         Log.w("endBtnClicked", "View")
-        Thread{
-            tello?.close()
-        }.start()
+        telloAction(TelloActions.END)
     }
 
     fun upBtnClicked(view: View?) {
         Log.i("upBtnClicked", "View")
-        Thread{
-            tello?.up(MOVEMENT_RANGE)
-        }.start()
+        telloAction(TelloActions.UP)
     }
 
     fun ccwBtnClicked(view: View?) {
         Log.i("ccwBtnClicked", "View")
-        Thread{
-            tello?.ccw(MOVEMENT_RANGE)
-        }.start()
+        telloAction(TelloActions.CCW)
     }
 
     fun downBtnClicked(view: View?) {
         Log.i("downBtnClicked", "View")
-        Thread{
-            tello?.down(MOVEMENT_RANGE)
-        }.start()
+        telloAction(TelloActions.DOWN)
     }
 
     fun cwBtnClicked(view: View?) {
         Log.i("cwBtnClicked", "View")
-        Thread{
-            tello?.cw(MOVEMENT_RANGE)
-        }.start()
+        telloAction(TelloActions.CW)
     }
 
     fun forwardBtnClicked(view: View?) {
         Log.i("forwardBtnClicked", "View")
-        Thread{
-            tello?.forward(MOVEMENT_RANGE)
-        }.start()
+        telloAction(TelloActions.FORWARD)
     }
 
     fun leftBtnClicked(view: View?) {
         Log.i("leftBtnClicked", "View")
-        Thread{
-            tello?.left(MOVEMENT_RANGE)
-        }.start()
+        telloAction(TelloActions.LEFT)
     }
 
     fun backBtnClicked(view: View?) {
         Log.i("backBtnClicked", "View")
-        Thread{
-            tello?.back(MOVEMENT_RANGE)
-        }.start()
+        telloAction(TelloActions.BACK)
     }
 
     fun rightBtnClicked(view: View?) {
         Log.i("rightBtnClicked", "View")
+        telloAction(TelloActions.RIGHT)
+    }
+
+    private fun telloAction(action: TelloActions){
         Thread{
-            tello?.right(MOVEMENT_RANGE)
+            try {
+                if (tello?.isConnected!!){
+                    when(action){
+                        TelloActions.TAKEOFF -> tello?.takeOff()
+                        TelloActions.LAND -> tello?.land()
+                        TelloActions.END -> {
+                            askFlag = false
+                            tello?.close()
+                        }
+                        TelloActions.UP -> tello?.up(MOVEMENT_RANGE)
+                        TelloActions.CCW -> tello?.ccw(MOVEMENT_RANGE)
+                        TelloActions.DOWN -> tello?.down(MOVEMENT_RANGE)
+                        TelloActions.CW -> tello?.cw(MOVEMENT_RANGE)
+                        TelloActions.FORWARD -> tello?.forward(MOVEMENT_RANGE)
+                        TelloActions.LEFT -> tello?.left(MOVEMENT_RANGE)
+                        TelloActions.BACK -> tello?.back(MOVEMENT_RANGE)
+                        TelloActions.RIGHT -> tello?.right(MOVEMENT_RANGE)
+                    }
+                } else {
+                    runOnUiThread {
+                        Toast.makeText(applicationContext, "Please connect to Tello", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            } catch (e: Exception) {
+                print(e)
+            }
         }.start()
     }
 }
