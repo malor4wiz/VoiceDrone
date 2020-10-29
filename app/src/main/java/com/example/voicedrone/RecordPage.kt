@@ -11,6 +11,7 @@ import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import org.json.JSONObject
 import java.io.*
@@ -66,9 +67,13 @@ class RecordPage : AppCompatActivity() {
 
     fun onClick(v: View?) {
         if (!flag) {
+            val recordButton = findViewById<Button>(R.id.RecordButton)
+            recordButton.text = "STOP"
             startAudioRecord()
         } else {
             stopAudioRecord()
+            val recordButton = findViewById<Button>(R.id.RecordButton)
+            recordButton.text = "RECORD"
         }
         flag = !flag
     }

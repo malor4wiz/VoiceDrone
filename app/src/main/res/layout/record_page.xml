@@ -7,7 +7,7 @@
     android:layout_height="match_parent">
 
     <Button
-        android:id="@+id/button"
+        android:id="@+id/RecordButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Record"
@@ -15,10 +15,11 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:onClick="onClick"/>
+        android:onClick="onClick"
+        android:soundEffectsEnabled="false"/>
 
     <Button
-        android:id="@+id/button2"
+        android:id="@+id/RequestButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Request"
@@ -26,7 +27,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.501"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/button"
+        app:layout_constraintTop_toBottomOf="@+id/RecordButton"
         app:layout_constraintVertical_bias="0.286"
         android:onClick="onClickRequest"/>
 </androidx.constraintlayout.widget.ConstraintLayout>
