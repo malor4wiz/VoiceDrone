@@ -13,13 +13,14 @@ import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.*
 import android.widget.AdapterView.OnItemClickListener
-import android.widget.ArrayAdapter
-import android.widget.Button
-import android.widget.ListView
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 
+var internetWiFiStr = ""
+var droneWiFiStr = ""
+var internetPasswordStr = ""
+var dronePasswordStr = ""
 
 class WiFiSelectPage : AppCompatActivity() {
     private val PERMISSIONS_REQUEST_CODE_ACCESS_COARSE_LOCATION = 0
@@ -27,6 +28,8 @@ class WiFiSelectPage : AppCompatActivity() {
     private var adapter : ArrayAdapter<String>? = null
     private var internetWiFi : TextView? = null
     private var droneWiFi : TextView? = null
+    private var internetPassword : EditText? = null
+    private var dronePassword : EditText? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -90,6 +93,9 @@ class WiFiSelectPage : AppCompatActivity() {
         internetWiFi = findViewById(R.id.internetWiFi)
         droneWiFi = findViewById(R.id.droneWiFi)
 
+        dronePassword = findViewById(R.id.DronePassword)
+        internetPassword = findViewById(R.id.InternetPassword)
+
         listView.onItemClickListener = OnItemClickListener { parent, view, position, id ->
             AlertDialog.Builder(this)
                 .setTitle("WiFi-setting")
@@ -107,11 +113,22 @@ class WiFiSelectPage : AppCompatActivity() {
 
         val connectButton = findViewById<Button>(R.id.connectButton)
         connectButton.setOnClickListener { _ ->
-            val intent = Intent(application, RecordPage::class.java)
-            startActivity(intent)
-//            Log.w("connectionButton", "Clicked")
-//            val connection = Connection(this, internetWiFi?.text.toString(), "326824658235a")
-//            connection.invoke()
+            Log.w("connectionButton", "Clicked")
+            internetWiFiStr = internetWiFi?.text.toString()
+            droneWiFiStr = droneWiFi?.text.toString()
+
+            internetPasswordStr = internetPassword?.text.toString()
+            dronePasswordStr = dronePassword?.text.toString()
+
+            if((internetWiFiStr != "選択されていません") && (droneWiFiStr != "選択されていません")){
+                val connection = Connection(this, internetWiFi?.text.toString(), "326824658235a")
+                connection.invoke()
+
+                val intent = Intent(application, RecordPage::class.java)
+                startActivity(intent)
+            } else {
+                Toast.makeText(applicationContext, "WiFiが選択されていません", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -124,11 +141,9 @@ class WiFiSelectPage : AppCompatActivity() {
         if (requestCode == PERMISSIONS_REQUEST_CODE_ACCESS_COARSE_LOCATION
             && grantResults[0] == PackageManager.PERMISSION_GRANTED
         ) {
-            // 許可された場合
             scanWifi()
         } else {
-            // 許可されなかった場合
-            // 何らかの対処が必要
+            Toast.makeText(applicationContext, "permissionが許可されていません", Toast.LENGTH_SHORT).show()
         }
     }
 

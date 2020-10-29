@@ -30,8 +30,8 @@
 
     <ListView
         android:id="@+id/scannedWiFi"
-        android:layout_width="263dp"
-        android:layout_height="226dp"
+        android:layout_width="220dp"
+        android:layout_height="107dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.369"
@@ -55,7 +55,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="36dp"
         android:layout_marginTop="44dp"
-        android:text="ドローンWiFi"
+        android:text="・ドローンWiFi"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/scannedWiFi" />
 
@@ -65,7 +65,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="56dp"
         android:layout_marginTop="44dp"
-        android:text="インターネットWiFi"
+        android:text="・インターネットWiFi"
         app:layout_constraintStart_toEndOf="@+id/droneWiFiLabel"
         app:layout_constraintTop_toBottomOf="@+id/scannedWiFi" />
 
@@ -73,13 +73,13 @@
         android:id="@+id/droneWiFi"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="52dp"
+        android:layout_marginStart="44dp"
         android:layout_marginTop="32dp"
         android:text="選択してください"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/droneWiFiLabel"
-        app:layout_constraintVertical_bias="0.085" />
+        app:layout_constraintVertical_bias="0.0" />
 
     <TextView
         android:id="@+id/internetWiFi"
@@ -91,18 +91,60 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toEndOf="@+id/droneWiFi"
         app:layout_constraintTop_toBottomOf="@+id/internetWiFiLabel"
-        app:layout_constraintVertical_bias="0.085" />
+        app:layout_constraintVertical_bias="0.0" />
 
     <Button
         android:id="@+id/connectButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="36dp"
         android:text="Connect"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.482"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/droneWiFi"
-        app:layout_constraintVertical_bias="0.0" />
+        app:layout_constraintTop_toBottomOf="@+id/DronePassword"
+        app:layout_constraintVertical_bias="0.242" />
+
+    <EditText
+        android:id="@+id/DronePassword"
+        android:layout_width="108dp"
+        android:layout_height="50dp"
+        android:layout_marginStart="44dp"
+        android:layout_marginTop="16dp"
+        android:ems="20"
+        android:inputType="textPassword"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/DronePasswordLabel" />
+
+    <EditText
+        android:id="@+id/InternetPassword"
+        android:layout_width="113dp"
+        android:layout_height="50dp"
+        android:layout_marginStart="48dp"
+        android:layout_marginTop="16dp"
+        android:ems="20"
+        android:inputType="textPassword"
+        app:layout_constraintStart_toEndOf="@+id/DronePassword"
+        app:layout_constraintTop_toBottomOf="@+id/InternetPasswordLabel" />
+
+    <TextView
+        android:id="@+id/DronePasswordLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="36dp"
+        android:layout_marginTop="32dp"
+        android:text="・DronePassword"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/droneWiFi" />
+
+    <TextView
+        android:id="@+id/InternetPasswordLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="36dp"
+        android:layout_marginTop="32dp"
+        android:text="・InternetPassword"
+        app:layout_constraintStart_toEndOf="@+id/DronePasswordLabel"
+        app:layout_constraintTop_toBottomOf="@+id/internetWiFi" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
