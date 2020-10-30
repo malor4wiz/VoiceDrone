@@ -169,11 +169,6 @@ class WiFiSelectPage : AppCompatActivity() {
             adapter?.addAll(*newWifis)
         }
 
-//        for(wifi in wifis) {
-//            if(!newWifis.contains(wifi)) {
-//                adapter?.remove(wifi)
-//            }
-//        }
         adapter?.notifyDataSetChanged()
         wifis += newWifis
     }
