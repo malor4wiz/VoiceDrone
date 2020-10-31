@@ -120,12 +120,14 @@ class WiFiSelectPage : AppCompatActivity() {
             internetWiFiPass = internetPassword?.text.toString()
             droneWiFiPass = dronePassword?.text.toString()
 
-            if((internetWiFiID != "選択されていません") && (droneWiFiID != "選択されていません")){
+            if((internetWiFiID != "選択してください") && (droneWiFiID != "選択してください")){
                 val connection = Connection(this, internetWiFi?.text.toString(), "326824658235a")
                 connection.invoke()
 
-//                val intent = Intent(application, RecordPage::class.java)
-//                startActivity(intent)
+                Thread.sleep(1000)
+
+                val intent = Intent(application, RecordPage::class.java)
+                startActivity(intent)
             } else {
                 Toast.makeText(applicationContext, "WiFiが選択されていません", Toast.LENGTH_SHORT).show()
             }

@@ -26,12 +26,15 @@ class RecordResultPage : AppCompatActivity() {
         val intent = intent
         val voiceResult = findViewById<TextView>(R.id.voiceResult)
 
-
         val rightRecognition = findViewById<TextView>(R.id.rightRecognition)
         val leftRecognition = findViewById<TextView>(R.id.leftRecognition)
 
         val rightRecognitionRate = intent.getStringExtra("rightRecognitionRate")
         val leftRecognitionRate = intent.getStringExtra("leftRecognitionRate")
+
+        val connection = Connection(this, droneWiFiID, droneWiFiPass)
+        connection.disable()
+        connection.invoke()
 
         if (rightRecognitionRate != null && leftRecognitionRate != null) {
             val rightRecognitnionRateFloat = rightRecognitionRate.toFloat()
@@ -55,16 +58,7 @@ class RecordResultPage : AppCompatActivity() {
 
         if (orderValid) {
             Log.v("Connection", "drone")
-            GlobalScope.launch {
-                withContext(Dispatchers.Default) {
-                    Connection(
-                        applicationContext,
-                        droneWiFiID,
-                        droneWiFiPass
-                    ).invoke()
-                }
-                initTello()
-            }
+            initTello()
         }
     }
 
@@ -72,6 +66,8 @@ class RecordResultPage : AppCompatActivity() {
         tello = KTello()
         Log.v("initTello", "tello")
         Thread{
+            Thread.sleep(5000)
+            Log.v("wait", "waited")
             try {
                 tello?.connect()
                 Thread.sleep(3000)
@@ -101,6 +97,16 @@ class RecordResultPage : AppCompatActivity() {
 
     fun onClickHomeButton(view: View?) {
         val intent = Intent(application, HomePage::class.java)
+        startActivity(intent)
+    }
+
+    fun onClickVoiceButton(view: View?) {
+        val intent = Intent(application, RecordPage::class.java)
+        startActivity(intent)
+    }
+
+    fun onClickTouchButton(view: View?) {
+        val intent = Intent(application, TouchPage::class.java)
         startActivity(intent)
     }
 }

@@ -195,7 +195,7 @@ class RecordPage : AppCompatActivity() {
             val jsonObject = JSONObject(string)
             Log.w("result:", jsonObject.get("result").toString())
 
-            val intent = Intent(application, RecordResultPage::class.java)
+            val intent = Intent(application, RecordResultPage::class.java).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
             val result = jsonObject.get("result").toString()
             val rightRecognitionRate = jsonObject.getJSONObject("prob").get("right").toString()
             val leftRecognitionRate = jsonObject.getJSONObject("prob").get("left").toString()

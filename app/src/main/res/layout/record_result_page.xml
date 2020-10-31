@@ -63,17 +63,6 @@
         app:layout_constraintStart_toStartOf="@+id/rightRecognitionTitle"
         app:layout_constraintTop_toBottomOf="@+id/rightRecognitionTitle" />
 
-    <Button
-        android:id="@+id/homeButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="136dp"
-        android:layout_marginTop="44dp"
-        android:onClick="onClickHomeButton"
-        android:text="Home"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/leftRecognition" />
-
     <TextView
         android:id="@+id/rightRecognition"
         android:layout_width="wrap_content"
@@ -91,4 +80,35 @@
         android:text="%"
         app:layout_constraintStart_toEndOf="@+id/leftRecognitionTitle"
         app:layout_constraintTop_toTopOf="@+id/leftRecognitionTitle" />
+
+    <Button
+        android:id="@+id/homeButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="36dp"
+        android:onClick="onClickHomeButton"
+        android:text="Home"
+        app:layout_constraintStart_toStartOf="@+id/touchButton"
+        app:layout_constraintTop_toBottomOf="@+id/touchButton" />
+
+    <Button
+        android:id="@+id/voiceButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="136dp"
+        android:layout_marginTop="36dp"
+        android:text="Voice"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/leftRecognition"
+        android:onClick="onClickVoiceButton"/>
+
+    <Button
+        android:id="@+id/touchButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:text="Touch"
+        app:layout_constraintStart_toStartOf="@+id/voiceButton"
+        app:layout_constraintTop_toBottomOf="@+id/voiceButton"
+        android:onClick="onClickTouchButton"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

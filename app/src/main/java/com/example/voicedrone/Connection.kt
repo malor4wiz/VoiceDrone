@@ -18,9 +18,6 @@ class Connection(private val context: Context, private val wifiSSID: String, pri
     private var wifiManager =
         context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
 
-    private val connectivityManager =
-        context.applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-
     operator fun invoke() {
         Log.v("v", "invoke")
         connect()
@@ -43,18 +40,6 @@ class Connection(private val context: Context, private val wifiSSID: String, pri
         addNetwork()
     }
 
-//    private fun initNetwork(): Single<Network> {
-//        Log.v("v","Initializing network...")
-//        return Single.just(connectivityManager.allNetworks.find {
-//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//                connectivityManager.getNetworkCapabilities(it)
-//                    .hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
-//            } else {
-//                connectivityManager.getNetworkInfo(it).extraInfo == wifiSSID
-//            }
-//        })
-//    }
-
     private fun addNetwork() {
         Log.v("v","Connecting to ${wifiSSID}...")
         val wc = WifiConfiguration()
@@ -75,5 +60,11 @@ class Connection(private val context: Context, private val wifiSSID: String, pri
         val currentSSID = wifiManager.connectionInfo.ssid ?: return false
         Log.v("v","Connected to $currentSSID")
         return currentSSID == "\"${wifiSSID}\""
+    }
+
+    fun disable() {
+        Log.v("v", "Current Network is disabled")
+        val netid = wifiManager.connectionInfo.networkId
+        wifiManager.disableNetwork(netid)
     }
 }
