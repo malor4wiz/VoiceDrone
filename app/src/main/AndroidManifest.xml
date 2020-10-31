@@ -30,6 +30,7 @@
         <activity android:name=".TouchPage"
             android:screenOrientation="landscape"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+        <activity android:name=".RecordResultPage" />
     </application>
 
 </manifest>

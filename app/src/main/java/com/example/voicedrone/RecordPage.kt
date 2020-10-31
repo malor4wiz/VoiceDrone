@@ -1,6 +1,7 @@
 package com.example.voicedrone
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.media.AudioFormat
 import android.media.AudioRecord
@@ -191,8 +192,19 @@ class RecordPage : AppCompatActivity() {
 
         override fun onPostExecute(string: String?) {
             Log.w("result:", string)
-//            val jsonObject = JSONObject(string)
-//            Log.w("result:", jsonObject.get("result").toString())
+            val jsonObject = JSONObject(string)
+            Log.w("result:", jsonObject.get("result").toString())
+
+            val intent = Intent(application, RecordResultPage::class.java)
+            val result = jsonObject.get("result").toString()
+            val rightRecognitionRate = jsonObject.getJSONObject("prob").get("right").toString()
+            val leftRecognitionRate = jsonObject.getJSONObject("prob").get("left").toString()
+
+            intent.putExtra("result", result)
+            intent.putExtra("rightRecognitionRate", rightRecognitionRate)
+            intent.putExtra("leftRecognitionRate", leftRecognitionRate)
+
+            startActivity(intent)
         }
     }
 }

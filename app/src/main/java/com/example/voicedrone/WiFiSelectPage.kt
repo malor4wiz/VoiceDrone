@@ -17,10 +17,10 @@ import android.widget.*
 import android.widget.AdapterView.OnItemClickListener
 import androidx.appcompat.app.AppCompatActivity
 
-var internetWiFiStr = ""
-var droneWiFiStr = ""
-var internetPasswordStr = ""
-var dronePasswordStr = ""
+var internetWiFiID = ""
+var droneWiFiID = ""
+var internetWiFiPass = ""
+var droneWiFiPass = ""
 
 class WiFiSelectPage : AppCompatActivity() {
     private val PERMISSIONS_REQUEST_CODE_ACCESS_COARSE_LOCATION = 0
@@ -114,18 +114,18 @@ class WiFiSelectPage : AppCompatActivity() {
         val connectButton = findViewById<Button>(R.id.connectButton)
         connectButton.setOnClickListener { _ ->
             Log.w("connectionButton", "Clicked")
-            internetWiFiStr = internetWiFi?.text.toString()
-            droneWiFiStr = droneWiFi?.text.toString()
+            internetWiFiID = internetWiFi?.text.toString()
+            droneWiFiID = droneWiFi?.text.toString()
 
-            internetPasswordStr = internetPassword?.text.toString()
-            dronePasswordStr = dronePassword?.text.toString()
+            internetWiFiPass = internetPassword?.text.toString()
+            droneWiFiPass = dronePassword?.text.toString()
 
-            if((internetWiFiStr != "選択されていません") && (droneWiFiStr != "選択されていません")){
+            if((internetWiFiID != "選択されていません") && (droneWiFiID != "選択されていません")){
                 val connection = Connection(this, internetWiFi?.text.toString(), "326824658235a")
                 connection.invoke()
 
-                val intent = Intent(application, RecordPage::class.java)
-                startActivity(intent)
+//                val intent = Intent(application, RecordPage::class.java)
+//                startActivity(intent)
             } else {
                 Toast.makeText(applicationContext, "WiFiが選択されていません", Toast.LENGTH_SHORT).show()
             }
