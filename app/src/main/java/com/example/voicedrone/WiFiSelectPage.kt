@@ -124,9 +124,11 @@ class WiFiSelectPage : AppCompatActivity() {
                 val connection = Connection(this, internetWiFi?.text.toString(), "326824658235a")
                 connection.invoke()
 
-                Thread.sleep(1000)
+                Thread.sleep(2000)
 
                 val intent = Intent(application, RecordPage::class.java)
+                intent.putExtra("activity", EnumActivity.WiFiSelect)
+                intent.putExtra("recordPageFirst", true)
                 startActivity(intent)
             } else {
                 Toast.makeText(applicationContext, "WiFiが選択されていません", Toast.LENGTH_SHORT).show()

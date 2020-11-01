@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.coroutines.Dispatchers
@@ -17,11 +18,16 @@ class RecordResultPage : AppCompatActivity() {
     private var orderIsRight = false
     private var orderValid = true
 
+    private var voiceButton: Button? = null
+
     val MOVEMENT_RANGE = 20
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.record_result_page)
+
+        voiceButton = findViewById<Button>(R.id.voiceButton)
+        voiceButton?.isEnabled = false
 
         val intent = intent
         val voiceResult = findViewById<TextView>(R.id.voiceResult)
@@ -64,6 +70,7 @@ class RecordResultPage : AppCompatActivity() {
 
     private fun initTello() {
         tello = KTello()
+        KTelloHandler.tello = tello
         Log.v("initTello", "tello")
         Thread{
             Thread.sleep(5000)
@@ -87,6 +94,9 @@ class RecordResultPage : AppCompatActivity() {
                         }
                     }
                     tello?.land()
+                    runOnUiThread{
+                        voiceButton?.isEnabled = true
+                    }
                 }
             } catch (e: Exception) {
                 Log.v("Exception", "tello")
@@ -101,12 +111,21 @@ class RecordResultPage : AppCompatActivity() {
     }
 
     fun onClickVoiceButton(view: View?) {
+        Thread{
+            tello?.close()
+        }.start()
         val intent = Intent(application, RecordPage::class.java)
+        intent.putExtra("activity", EnumActivity.RecordResult)
+        val connection = Connection(this, internetWiFiID, internetWiFiPass)
+        connection.disable()
+        connection.invoke()
+        Thread.sleep(2000)
         startActivity(intent)
     }
 
     fun onClickTouchButton(view: View?) {
         val intent = Intent(application, TouchPage::class.java)
+        intent.putExtra("activity", EnumActivity.RecordResult)
         startActivity(intent)
     }
 }

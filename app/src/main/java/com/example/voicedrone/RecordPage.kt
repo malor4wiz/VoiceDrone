@@ -63,10 +63,9 @@ class RecordPage : AppCompatActivity() {
             }
         }
         initAudioRecord()
-
     }
 
-    fun onClick(v: View?) {
+    fun onClickRecordButton(v: View?) {
         if (!flag) {
             val recordButton = findViewById<Button>(R.id.RecordButton)
             recordButton.text = "STOP"
@@ -81,7 +80,7 @@ class RecordPage : AppCompatActivity() {
 
     fun onClickRequest(v: View?) {
         try {
-            UploadHttpRequest().execute(
+            UploadHttpRequest(intent).execute(
                 "http://35.200.72.132/speech"
             )
         } catch (e: IOException) {
@@ -137,7 +136,8 @@ class RecordPage : AppCompatActivity() {
         audioRecord!!.stop()
     }
 
-    inner class UploadHttpRequest() : AsyncTask<String, Void, String>() {
+    inner class UploadHttpRequest(intent: Intent) : AsyncTask<String, Void, String>() {
+        private val intent = intent
         override fun doInBackground(vararg params: String): String? {
             val uri = params[0]
             var connection: HttpURLConnection? = null

@@ -35,7 +35,6 @@ class TouchPage : AppCompatActivity() {
         LEFT
     }
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.touch_page)
@@ -44,21 +43,44 @@ class TouchPage : AppCompatActivity() {
         batteryLabel = findViewById(R.id.batteryLabel)
         timeLabel = findViewById(R.id.timeLabel)
 
-        tello = KTello()
+        when(intent.getSerializableExtra("activity")) {
+            EnumActivity.Home -> {
+                tello = KTello()
 
-        Thread{
-            try {
-                tello?.connect()
-            } catch (e: Exception) {
-                print(e)
+                Thread{
+                    try {
+                        tello?.connect()
+                    } catch (e: Exception) {
+                        print(e)
+                    }
+                    if (tello?.isConnected!!) {
+                        runOnUiThread {
+                            connectionLabel?.text = "OK"
+                        }
+                        askTello()
+                    }
+                }.start()
             }
-            if (tello?.isConnected!!) {
-                runOnUiThread {
-                    connectionLabel?.text = "OK"
-                }
-                askTello()
+            EnumActivity.RecordResult -> {
+                tello = KTelloHandler.tello
+
+                Thread{
+                    try {
+                        if (!(tello?.isConnected!!)){
+                            tello?.connect()
+                        }
+                    } catch (e: Exception) {
+                        print(e)
+                    }
+                    if (tello?.isConnected!!) {
+                        runOnUiThread {
+                            connectionLabel?.text = "OK"
+                        }
+                        askTello()
+                    }
+                }.start()
             }
-        }.start()
+        }
     }
 
     private fun askTello(){
@@ -67,7 +89,7 @@ class TouchPage : AppCompatActivity() {
                 val battery: String? = tello?.battery + "%"
 
                 runOnUiThread{
-                    if (battery != "ok") {
+                    if (battery != "ok%") {
                         batteryLabel?.text = battery
                     }
                 }
@@ -77,7 +99,7 @@ class TouchPage : AppCompatActivity() {
                 val time: String? = tello?.time
 
                 runOnUiThread{
-                    if (battery != "ok") {
+                    if (time != "ok") {
                         timeLabel?.text = time
                     }
                 }

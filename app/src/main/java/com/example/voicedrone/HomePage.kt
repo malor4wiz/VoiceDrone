@@ -19,6 +19,7 @@ class HomePage : AppCompatActivity() {
 
     fun onClickTouchOrder(view: View?) {
         val intent = Intent(application, TouchPage::class.java)
+        intent.putExtra("activity", EnumActivity.Home)
         startActivity(intent)
     }
 }
