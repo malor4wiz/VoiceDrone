@@ -52,6 +52,7 @@ class RecordResultPage : AppCompatActivity() {
                 orderValid = false
                 val yourOrderSentence = findViewById<TextView>(R.id.yourOrderSentence)
                 yourOrderSentence.text = "has Not been carrying out "
+                voiceButton?.isEnabled = true
             } else {
                 Log.v("orderIsRight", "false")
             }
@@ -83,15 +84,19 @@ class RecordResultPage : AppCompatActivity() {
                     tello?.takeOff()
                     Thread.sleep(3000)
                     if (orderIsRight) {
-                        repeat(5) {
-                            tello?.right(MOVEMENT_RANGE)
-                            Thread.sleep(3000)
-                        }
+                        tello?.cw(360)
+                        Thread.sleep(10000)
+                        tello?.up(50)
+                        Thread.sleep(2000)
+                        tello?.flip("r")
+                        Thread.sleep(2000)
                     } else {
-                        repeat(5) {
-                            tello?.left(MOVEMENT_RANGE)
-                            Thread.sleep(3000)
-                        }
+                        tello?.ccw(360)
+                        Thread.sleep(10000)
+                        tello?.forward(50)
+                        Thread.sleep(2000)
+                        tello?.flip("l")
+                        Thread.sleep(2000)
                     }
                     tello?.land()
                     runOnUiThread{
@@ -103,11 +108,6 @@ class RecordResultPage : AppCompatActivity() {
                 Log.e("Tello", e.toString())
             }
         }.start()
-    }
-
-    fun onClickHomeButton(view: View?) {
-        val intent = Intent(application, HomePage::class.java)
-        startActivity(intent)
     }
 
     fun onClickVoiceButton(view: View?) {
@@ -126,6 +126,14 @@ class RecordResultPage : AppCompatActivity() {
     fun onClickTouchButton(view: View?) {
         val intent = Intent(application, TouchPage::class.java)
         intent.putExtra("activity", EnumActivity.RecordResult)
+        startActivity(intent)
+    }
+
+    fun onClickHomeButton(view: View?) {
+        Thread{
+            tello?.close()
+        }.start()
+        val intent = Intent(application, HomePage::class.java)
         startActivity(intent)
     }
 }

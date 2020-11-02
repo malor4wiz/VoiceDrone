@@ -4,14 +4,9 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.net.ConnectivityManager
-import android.net.Network
-import android.net.NetworkCapabilities
 import android.net.wifi.WifiConfiguration
 import android.net.wifi.WifiManager
-import android.os.Build
 import android.util.Log
-import io.reactivex.rxjava3.core.Single
 
 class Connection(private val context: Context, private val wifiSSID: String, private val wifiPassword: String) {
 
