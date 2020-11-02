@@ -90,7 +90,7 @@ class RecordPage : AppCompatActivity() {
 
     //AudioRecordの初期化
     private fun initAudioRecord() {
-        wav1.createFile("/sdcard/voice_drone/here.wav")
+        wav1.createFile("/sdcard/voice_drone/indication.wav")
         // AudioRecordオブジェクトを作成
         bufSize = AudioRecord.getMinBufferSize(
             SAMPLING_RATE,
@@ -134,6 +134,15 @@ class RecordPage : AppCompatActivity() {
     //オーディオレコードを停止する
     private fun stopAudioRecord() {
         audioRecord!!.stop()
+        audioRecord!!.release()
+
+        try {
+            UploadHttpRequest(intent).execute(
+                "http://35.200.72.132/speech"
+            )
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
     }
 
     inner class UploadHttpRequest(intent: Intent) : AsyncTask<String, Void, String>() {
@@ -143,7 +152,7 @@ class RecordPage : AppCompatActivity() {
             var connection: HttpURLConnection? = null
             val sb = StringBuilder()
             try {
-                val stream = File("/sdcard/voice_drone/here.wav").readBytes()
+                val stream = File("/sdcard/voice_drone/indication.wav").readBytes()
 
                 //streamをbyte配列に変換し, Base64でエンコード
                 val encodedJpg: String = Base64.getEncoder().encodeToString(stream)
@@ -217,7 +226,7 @@ class MyWaveFile {
             : RandomAccessFile? = null
     private var recFile //録音後の書き込み、読み込みようファイル
             : File? = null
-    private var fileName = "/sdcard/voice_drone/here.wav" //録音ファイルのパス
+    private var fileName = "/sdcard/voice_drone/indication.wav" //録音ファイルのパス
     private val RIFF = byteArrayOf(
         'R'.toByte(),
         'I'.toByte(),

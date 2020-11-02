@@ -1,3 +1,4 @@
+import android.util.Log
 import java.io.IOException
 import java.net.DatagramPacket
 import java.net.DatagramSocket
@@ -199,6 +200,9 @@ class KTello {
         val receivePacket = DatagramPacket(receiveData, receiveData.size)
         socket!!.receive(receivePacket)
         val ret = String(receivePacket.data)
+        if (ret.substring(0, 1) == "er") {
+            Log.w("Tello", "Tello $strCommand: $ret")
+        }
         println("Tello $strCommand: $ret")
         return ret
     }

@@ -13,18 +13,36 @@ class Connection(private val context: Context, private val wifiSSID: String, pri
     private var wifiManager =
         context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
 
-    operator fun invoke() {
-        Log.v("v", "invoke")
-        connect()
-    }
+    private var flag = true
 
-    private fun connect() {
+    fun connect() {
         Log.v("v", "connect")
         val intentFilter = IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION)
         val receiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 if (isConnectedToCorrectSSID()) {
                     Log.v("v","Successfully connected to the device.")
+                } else {
+                    Log.w("w","Still not connected to ${wifiSSID}. Waiting a little bit more...")
+                }
+            }
+        }
+        Log.v("v","Registering connection receiver...")
+        context.registerReceiver(receiver, intentFilter)
+        addNetwork()
+    }
+
+    fun connect(callback: () -> Unit?) {
+        Log.v("v", "connect")
+        val intentFilter = IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION)
+        val receiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                if (isConnectedToCorrectSSID()) {
+                    Log.v("v","Successfully connected to the device.")
+                    if (flag) {
+                        callback()
+                        flag = !flag
+                    }
                 } else {
                     Log.w("w","Still not connected to ${wifiSSID}. Waiting a little bit more...")
                 }
@@ -57,6 +75,7 @@ class Connection(private val context: Context, private val wifiSSID: String, pri
         return currentSSID == "\"${wifiSSID}\""
     }
 
+    //WiFiに接続途中などの場合は、
     fun disable() {
         Log.v("v", "Current Network is disabled")
         val netid = wifiManager.connectionInfo.networkId

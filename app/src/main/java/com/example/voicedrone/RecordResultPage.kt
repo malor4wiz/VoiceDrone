@@ -8,10 +8,6 @@ import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class RecordResultPage : AppCompatActivity() {
     private var tello : KTello? = null
@@ -20,18 +16,15 @@ class RecordResultPage : AppCompatActivity() {
 
     private var voiceButton: Button? = null
 
-    val MOVEMENT_RANGE = 20
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.record_result_page)
 
-        voiceButton = findViewById<Button>(R.id.voiceButton)
+        voiceButton = findViewById(R.id.voiceButton)
         voiceButton?.isEnabled = false
 
         val intent = intent
         val voiceResult = findViewById<TextView>(R.id.voiceResult)
-
         val rightRecognition = findViewById<TextView>(R.id.rightRecognition)
         val leftRecognition = findViewById<TextView>(R.id.leftRecognition)
 
@@ -40,7 +33,7 @@ class RecordResultPage : AppCompatActivity() {
 
         val connection = Connection(this, droneWiFiID, droneWiFiPass)
         connection.disable()
-        connection.invoke()
+        connection.connect()
 
         if (rightRecognitionRate != null && leftRecognitionRate != null) {
             val rightRecognitnionRateFloat = rightRecognitionRate.toFloat()
@@ -57,11 +50,10 @@ class RecordResultPage : AppCompatActivity() {
                 Log.v("orderIsRight", "false")
             }
 
+            voiceResult.text = intent.getStringExtra("result")
             rightRecognition.text = rightRecognitionRate + "%"
             leftRecognition.text = leftRecognitionRate + "%"
         }
-
-        voiceResult.text = intent.getStringExtra("result")
 
         if (orderValid) {
             Log.v("Connection", "drone")
@@ -74,8 +66,8 @@ class RecordResultPage : AppCompatActivity() {
         KTelloHandler.tello = tello
         Log.v("initTello", "tello")
         Thread{
+            // ドローンWiFiに接続切り替えするまで待っている
             Thread.sleep(5000)
-            Log.v("wait", "waited")
             try {
                 tello?.connect()
                 Thread.sleep(3000)
@@ -104,7 +96,6 @@ class RecordResultPage : AppCompatActivity() {
                     }
                 }
             } catch (e: Exception) {
-                Log.v("Exception", "tello")
                 Log.e("Tello", e.toString())
             }
         }.start()
@@ -115,12 +106,10 @@ class RecordResultPage : AppCompatActivity() {
             tello?.close()
         }.start()
         val intent = Intent(application, RecordPage::class.java)
-        intent.putExtra("activity", EnumActivity.RecordResult)
+        intent?.putExtra("activity", EnumActivity.RecordResult)
         val connection = Connection(this, internetWiFiID, internetWiFiPass)
         connection.disable()
-        connection.invoke()
-        Thread.sleep(2000)
-        startActivity(intent)
+        connection.connect{WiFiConnected(intent)}
     }
 
     fun onClickTouchButton(view: View?) {
@@ -134,6 +123,10 @@ class RecordResultPage : AppCompatActivity() {
             tello?.close()
         }.start()
         val intent = Intent(application, HomePage::class.java)
+        startActivity(intent)
+    }
+
+    private fun WiFiConnected(intent: Intent) {
         startActivity(intent)
     }
 }
