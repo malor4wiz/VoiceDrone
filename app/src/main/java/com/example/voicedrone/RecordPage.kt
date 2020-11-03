@@ -8,12 +8,13 @@ import android.media.AudioRecord
 import android.media.AudioRecord.OnRecordPositionUpdateListener
 import android.media.MediaRecorder
 import android.os.AsyncTask
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Button
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import org.json.JSONException
 import org.json.JSONObject
 import java.io.*
 import java.net.HttpURLConnection
@@ -34,33 +35,29 @@ class RecordPage : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.record_page)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            // 既に許可されているか確認
-            if (checkSelfPermission(Manifest.permission.RECORD_AUDIO)
-                != PackageManager.PERMISSION_GRANTED) {
-                // 許可されていなかったらリクエストする
-                // ダイアログが表示される
-                requestPermissions(
-                    arrayOf(
-                        Manifest.permission.RECORD_AUDIO
-                    ),
-                    PERMISSIONS_REQUEST_CODE_RECORD_AUDIO);
-                return;
-            }
+        // 既に許可されているか確認
+        if (checkSelfPermission(Manifest.permission.RECORD_AUDIO)
+            != PackageManager.PERMISSION_GRANTED) {
+            // 許可されていなかったらリクエストする
+            // ダイアログが表示される
+            requestPermissions(
+                arrayOf(
+                    Manifest.permission.RECORD_AUDIO
+                ),
+                PERMISSIONS_REQUEST_CODE_RECORD_AUDIO);
+            return;
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            // 既に許可されているか確認
-            if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED) {
-                // 許可されていなかったらリクエストする
-                // ダイアログが表示される
-                requestPermissions(
-                    arrayOf(
-                        Manifest.permission.WRITE_EXTERNAL_STORAGE
-                    ),
-                    PERMISSIONS_REQUEST_CODE_WRITE_EXTERNAL_STORAGE);
-                return;
-            }
+        // 既に許可されているか確認
+        if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            != PackageManager.PERMISSION_GRANTED) {
+            // 許可されていなかったらリクエストする
+            // ダイアログが表示される
+            requestPermissions(
+                arrayOf(
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                ),
+                PERMISSIONS_REQUEST_CODE_WRITE_EXTERNAL_STORAGE);
+            return;
         }
         initAudioRecord()
     }
@@ -80,7 +77,7 @@ class RecordPage : AppCompatActivity() {
 
     fun onClickRequest(v: View?) {
         try {
-            UploadHttpRequest(intent).execute(
+            UploadHttpRequest().execute(
                 "http://35.200.72.132/speech"
             )
         } catch (e: IOException) {
@@ -110,16 +107,11 @@ class RecordPage : AppCompatActivity() {
         audioRecord!!.setRecordPositionUpdateListener(object : OnRecordPositionUpdateListener {
             // フレームごとの処理
             override fun onPeriodicNotification(recorder: AudioRecord) {
-                Log.w("onPeriodicNotification", "here")
-                Log.w("shortData:", shortData.toString())
-                // TODO Auto-generated method stub
-                    audioRecord!!.read(shortData!!, 0, bufSize / 2) // 読み込む
-                    wav1.addBigEndianData(shortData!!) // ファイルに書き出す
+                audioRecord!!.read(shortData!!, 0, bufSize / 2) // 読み込む
+                wav1.addBigEndianData(shortData!!) // ファイルに書き出す
             }
 
-            override fun onMarkerReached(recorder: AudioRecord) {
-                // TODO Auto-generated method stub
-            }
+            override fun onMarkerReached(recorder: AudioRecord) {}
         })
         // コールバックが呼ばれる間隔を指定
         audioRecord!!.positionNotificationPeriod = bufSize / 2
@@ -127,7 +119,6 @@ class RecordPage : AppCompatActivity() {
 
     private fun startAudioRecord() {
         audioRecord!!.startRecording()
-        Log.w("shortData:", shortData.toString())
         audioRecord!!.read(shortData!!, 0, bufSize / 2)
     }
 
@@ -135,9 +126,10 @@ class RecordPage : AppCompatActivity() {
     private fun stopAudioRecord() {
         audioRecord!!.stop()
         audioRecord!!.release()
+        wav1.close()
 
         try {
-            UploadHttpRequest(intent).execute(
+            UploadHttpRequest().execute(
                 "http://35.200.72.132/speech"
             )
         } catch (e: IOException) {
@@ -145,8 +137,7 @@ class RecordPage : AppCompatActivity() {
         }
     }
 
-    inner class UploadHttpRequest(intent: Intent) : AsyncTask<String, Void, String>() {
-        private val intent = intent
+    inner class UploadHttpRequest() : AsyncTask<String, Void, String>() {
         override fun doInBackground(vararg params: String): String? {
             val uri = params[0]
             var connection: HttpURLConnection? = null
@@ -200,24 +191,25 @@ class RecordPage : AppCompatActivity() {
         }
 
         override fun onPostExecute(string: String?) {
-            Log.w("result:", string)
-            val jsonObject = JSONObject(string)
-            Log.w("result:", jsonObject.get("result").toString())
+            try {
+                val jsonObject = JSONObject(string)
 
-            val intent = Intent(application, RecordResultPage::class.java).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
-            val result = jsonObject.get("result").toString()
-            val rightRecognitionRate = jsonObject.getJSONObject("prob").get("right").toString()
-            val leftRecognitionRate = jsonObject.getJSONObject("prob").get("left").toString()
+                val intent = Intent(application, RecordResultPage::class.java).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
+                val result = jsonObject.get("result").toString()
+                val rightRecognitionRate = jsonObject.getJSONObject("prob").get("right").toString()
+                val leftRecognitionRate = jsonObject.getJSONObject("prob").get("left").toString()
 
-            intent.putExtra("result", result)
-            intent.putExtra("rightRecognitionRate", rightRecognitionRate)
-            intent.putExtra("leftRecognitionRate", leftRecognitionRate)
+                intent.putExtra("result", result)
+                intent.putExtra("rightRecognitionRate", rightRecognitionRate)
+                intent.putExtra("leftRecognitionRate", leftRecognitionRate)
 
-            startActivity(intent)
+                startActivity(intent)
+            } catch (Je : JSONException) {
+                Toast.makeText(applicationContext, Je.toString(), Toast.LENGTH_SHORT).show()
+            }
         }
     }
 }
-
 
 class MyWaveFile {
     private val FILESIZE_SEEK = 4
@@ -258,13 +250,11 @@ class MyWaveFile {
         try {
             recFile!!.createNewFile()
         } catch (e: IOException) {
-            //	TODO	Auto-generated	catch	block
             e.printStackTrace()
         }
         try {
             raf = RandomAccessFile(recFile, "rw")
         } catch (e: FileNotFoundException) {
-            //	TODO	Auto-generated	catch	block
             e.printStackTrace()
         }
 
@@ -285,7 +275,6 @@ class MyWaveFile {
             raf!!.write(data)
             raf!!.write(littleEndianInteger(dataSize))
         } catch (e: IOException) {
-            //	TODO	Auto-generated	catch	block
             e.printStackTrace()
         }
     }
@@ -308,7 +297,6 @@ class MyWaveFile {
             raf!!.seek(raf!!.length())
             raf!!.write(littleEndianShorts(shortData))
         } catch (e: IOException) {
-            // TODO Auto-generated catch block
             e.printStackTrace()
         }
 
@@ -327,7 +315,6 @@ class MyWaveFile {
             raf!!.seek(FILESIZE_SEEK.toLong())
             raf!!.write(fileSizeBytes)
         } catch (e: IOException) {
-            // TODO Auto-generated catch block
             e.printStackTrace()
         }
     }
@@ -340,7 +327,6 @@ class MyWaveFile {
             raf!!.seek(DATASIZE_SEEK.toLong())
             raf!!.write(dataSizeBytes)
         } catch (e: IOException) {
-            // TODO Auto-generated catch block
             e.printStackTrace()
         }
     }
@@ -357,8 +343,7 @@ class MyWaveFile {
     // short型配列をリトルエンディアンのbyte配列に変更
     private fun littleEndianShorts(s: ShortArray): ByteArray {
         val buffer = ByteArray(s.size * 2)
-        var i: Int
-        i = 0
+        var i = 0
         while (i < s.size) {
             buffer[2 * i] = s[i].toByte()
             buffer[2 * i + 1] = (s[i].toInt() shr 8).toByte()
@@ -373,7 +358,6 @@ class MyWaveFile {
         try {
             raf!!.close()
         } catch (e: IOException) {
-            // TODO Auto-generated catch block
             e.printStackTrace()
         }
     }

@@ -44,7 +44,7 @@ class TouchPage : AppCompatActivity() {
 
         when(intent.getSerializableExtra("activity")) {
             EnumActivity.Home -> {
-                tello = KTello()
+                tello = KTello(applicationContext)
 
                 Thread{
                     try {
@@ -111,17 +111,17 @@ class TouchPage : AppCompatActivity() {
     }
 
     fun takeoffBtnClicked(view: View?) {
-        Log.w("takeoffBtnClicked", "View")
+        Log.i("takeoffBtnClicked", "View")
         telloAction(TelloActions.TAKEOFF)
     }
 
     fun landBtnClicked(view: View?) {
-        Log.w("landBtnClicked", "View")
+        Log.i("landBtnClicked", "View")
         telloAction(TelloActions.LAND)
     }
 
     fun endBtnClicked(view: View?) {
-        Log.w("endBtnClicked", "View")
+        Log.i("endBtnClicked", "View")
         telloAction(TelloActions.END)
     }
 
@@ -191,7 +191,9 @@ class TouchPage : AppCompatActivity() {
                     }
                 }
             } catch (e: Exception) {
-                print(e)
+                runOnUiThread{
+                    Toast.makeText(applicationContext, e.toString(), Toast.LENGTH_LONG).show()
+                }
             }
         }.start()
     }

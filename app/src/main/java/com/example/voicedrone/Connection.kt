@@ -16,12 +16,12 @@ class Connection(private val context: Context, private val wifiSSID: String, pri
     private var flag = true
 
     fun connect() {
-        Log.v("v", "connect")
+        Log.i("i", "connect")
         val intentFilter = IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION)
         val receiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 if (isConnectedToCorrectSSID()) {
-                    Log.v("v","Successfully connected to the device.")
+                    Log.i("i","Successfully connected to the device.")
                 } else {
                     Log.w("w","Still not connected to ${wifiSSID}. Waiting a little bit more...")
                 }
@@ -38,8 +38,9 @@ class Connection(private val context: Context, private val wifiSSID: String, pri
         val receiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 if (isConnectedToCorrectSSID()) {
-                    Log.v("v","Successfully connected to the device.")
+                    Log.i("i","Successfully connected to the device.")
                     if (flag) {
+                        Log.i("i", "Connection Callback")
                         callback()
                         flag = !flag
                     }
@@ -48,13 +49,13 @@ class Connection(private val context: Context, private val wifiSSID: String, pri
                 }
             }
         }
-        Log.v("v","Registering connection receiver...")
+        Log.i("i","Registering connection receiver...")
         context.registerReceiver(receiver, intentFilter)
         addNetwork()
     }
 
     private fun addNetwork() {
-        Log.v("v","Connecting to ${wifiSSID}...")
+        Log.i("i","Connecting to ${wifiSSID}...")
         val wc = WifiConfiguration()
         wc.SSID = "\"" + wifiSSID + "\""
         wc.preSharedKey = "\"" + wifiPassword + "\""
@@ -71,13 +72,13 @@ class Connection(private val context: Context, private val wifiSSID: String, pri
 
     private fun isConnectedToCorrectSSID(): Boolean {
         val currentSSID = wifiManager.connectionInfo.ssid ?: return false
-        Log.v("v","Connected to $currentSSID")
+        Log.i("i","Connected to $currentSSID")
         return currentSSID == "\"${wifiSSID}\""
     }
 
     //WiFiに接続途中などの場合は、
     fun disable() {
-        Log.v("v", "Current Network is disabled")
+        Log.i("i", "Current Network is disabled")
         val netid = wifiManager.connectionInfo.networkId
         wifiManager.disableNetwork(netid)
     }

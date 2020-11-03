@@ -7,6 +7,7 @@ import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 
 class RecordResultPage : AppCompatActivity() {
@@ -37,17 +38,21 @@ class RecordResultPage : AppCompatActivity() {
 
         if (rightRecognitionRate != null && leftRecognitionRate != null) {
             val rightRecognitnionRateFloat = rightRecognitionRate.toFloat()
-            if (rightRecognitnionRateFloat > 0.6) {
-                Log.v("orderIsRight", "true")
-                orderIsRight = true
-            } else if (rightRecognitnionRateFloat > 0.4) {
-                Log.v("orderValid", "false")
-                orderValid = false
-                val yourOrderSentence = findViewById<TextView>(R.id.yourOrderSentence)
-                yourOrderSentence.text = "has Not been carrying out "
-                voiceButton?.isEnabled = true
-            } else {
-                Log.v("orderIsRight", "false")
+            when {
+                rightRecognitnionRateFloat > 0.6 -> {
+                    Log.v("orderIsRight", "true")
+                    orderIsRight = true
+                }
+                rightRecognitnionRateFloat > 0.4 -> {
+                    Log.v("orderValid", "false")
+                    orderValid = false
+                    val yourOrderSentence = findViewById<TextView>(R.id.yourOrderSentence)
+                    yourOrderSentence.text = "has Not been carrying out "
+                    voiceButton?.isEnabled = true
+                }
+                else -> {
+                    Log.v("orderIsRight", "false")
+                }
             }
 
             voiceResult.text = intent.getStringExtra("result")
@@ -62,7 +67,7 @@ class RecordResultPage : AppCompatActivity() {
     }
 
     private fun initTello() {
-        tello = KTello()
+        tello = KTello(applicationContext)
         KTelloHandler.tello = tello
         Log.v("initTello", "tello")
         Thread{
@@ -96,7 +101,9 @@ class RecordResultPage : AppCompatActivity() {
                     }
                 }
             } catch (e: Exception) {
-                Log.e("Tello", e.toString())
+                runOnUiThread{
+                    Toast.makeText(applicationContext, e.toString(), Toast.LENGTH_LONG).show()
+                }
             }
         }.start()
     }
@@ -106,7 +113,7 @@ class RecordResultPage : AppCompatActivity() {
             tello?.close()
         }.start()
         val intent = Intent(application, RecordPage::class.java)
-        intent?.putExtra("activity", EnumActivity.RecordResult)
+        intent.putExtra("activity", EnumActivity.RecordResult)
         val connection = Connection(this, internetWiFiID, internetWiFiPass)
         connection.disable()
         connection.connect{WiFiConnected(intent)}

@@ -8,8 +8,6 @@ import android.net.wifi.ScanResult
 import android.net.wifi.SupplicantState
 import android.net.wifi.WifiInfo
 import android.net.wifi.WifiManager
-import android.net.wifi.WifiManager.SCAN_RESULTS_AVAILABLE_ACTION
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -43,44 +41,37 @@ class WiFiSelectPage : AppCompatActivity() {
             override fun onReceive(context: Context, intent: Intent) {
                 val success = intent.getBooleanExtra(WifiManager.EXTRA_RESULTS_UPDATED, false)
                 if (success) {
-                    Log.w("Success", "yeah!")
-
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                        // 既に許可されているか確認
-                        if (checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION)
-                            != PackageManager.PERMISSION_GRANTED) {
-                            // 許可されていなかったらリクエストする
-                            // ダイアログが表示される
-                            requestPermissions(
-                                arrayOf(
-                                    Manifest.permission.ACCESS_COARSE_LOCATION
-                                ),
-                                PERMISSIONS_REQUEST_CODE_ACCESS_COARSE_LOCATION);
-                            return;
-                        } else {
-                            // 許可されていた場合
-                            scanWifi()
-                        }
+                    // 既に許可されているか確認
+                    if (checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION)
+                        != PackageManager.PERMISSION_GRANTED) {
+                        // 許可されていなかったらリクエストする
+                        // ダイアログが表示される
+                        requestPermissions(
+                            arrayOf(
+                                Manifest.permission.ACCESS_COARSE_LOCATION
+                            ),
+                            PERMISSIONS_REQUEST_CODE_ACCESS_COARSE_LOCATION);
+                        return;
+                    } else {
+                        // 許可されていた場合
+                        scanWifi()
                     }
-
-                } else {
-                    Log.w("Failure", "Oh,my")
                 }
             }
         }
 
-        applicationContext.registerReceiver(wifiScanReceiver, IntentFilter(SCAN_RESULTS_AVAILABLE_ACTION))
+        applicationContext.registerReceiver(wifiScanReceiver, IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION))
         val scanResult = manager.startScan()
 
-        Log.w("scanResult", scanResult.toString())
+        Log.v("scanResult", scanResult.toString())
 
         if(info.supplicantState == SupplicantState.COMPLETED) {
             val ssid = info.ssid
             val nowConnectingWiFi = findViewById<TextView>(R.id.nowConnectingWiFi)
             nowConnectingWiFi.text = ssid
-            Log.w("SSID", ssid)
+            Log.i("SSID", ssid)
         } else {
-            Log.w("SSID", "not supplied")
+            Log.i("SSID", "not supplied")
         }
 
         // リスト項目とListViewを対応付けるArrayAdapterを用意する
@@ -100,20 +91,18 @@ class WiFiSelectPage : AppCompatActivity() {
             AlertDialog.Builder(this)
                 .setTitle("WiFi-setting")
                 .setMessage("どちらか選択してください。")
-                .setPositiveButton("Internet-WiFi",
-                    DialogInterface.OnClickListener { dialog, which ->
-                        internetWiFi?.text = adapter?.getItem(position)
-                    })
-                .setNegativeButton("Drone-WiFi",
-                    DialogInterface.OnClickListener { dialog, which ->
-                        droneWiFi?.text = adapter?.getItem(position)
-                    })
+                .setPositiveButton("Internet-WiFi") { dialog, which ->
+                    internetWiFi?.text = adapter?.getItem(position)
+                }
+                .setNegativeButton("Drone-WiFi") { dialog, which ->
+                    droneWiFi?.text = adapter?.getItem(position)
+                }
                 .show()
         }
 
         val connectButton = findViewById<Button>(R.id.connectButton)
         connectButton.setOnClickListener { _ ->
-            Log.w("connectionButton", "Clicked")
+            Log.i("connectionButton", "Clicked")
             internetWiFiID = internetWiFi?.text.toString()
             droneWiFiID = droneWiFi?.text.toString()
 
@@ -134,6 +123,7 @@ class WiFiSelectPage : AppCompatActivity() {
         }
     }
 
+    // requestPermissions の後の処理
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<String?>,
@@ -152,19 +142,19 @@ class WiFiSelectPage : AppCompatActivity() {
     private fun scanWifi() {
         var manager : WifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
         val array: MutableList<ScanResult> = manager.scanResults
-        Log.w("scanResults", array.toString())
+        Log.i("scanResults", array.toString())
         var newWifis = arrayOf<String>()
         for (data in array) {
             if(!wifis.contains(data.SSID)) {
                 newWifis += data.SSID
             }
-            Log.w("result", data.SSID)
+            Log.i("result", data.SSID)
         }
         for(a in wifis){
-            Log.w("wifis", a)
+            Log.i("wifis", a)
         }
         for(a in newWifis){
-            Log.w("newWifis", a)
+            Log.i("newWifis", a)
         }
 
         if(newWifis.isNotEmpty()) {

@@ -1,8 +1,11 @@
+import android.content.Context
 import android.util.Log
+import android.widget.Toast
 import java.io.IOException
 import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
+import kotlin.math.roundToInt
 
 /**
  * Copyright ©  2018, Ivan Costa (http://github.com/ivanocj)
@@ -24,14 +27,12 @@ import java.net.InetAddress
  */
 
 
-class KTello {
+class KTello(context: Context) {
+    val context = context
 
-    internal var ip: InetAddress? = null
-        private set
-    internal var port: Int = 0
-        private set
-    internal var socket: DatagramSocket? = null
-        private set
+    private var ip: InetAddress? = null
+    private var port: Int = 0
+    private var socket: DatagramSocket? = null
     var isImperial: Boolean = false
 
     val isConnected: Boolean
@@ -180,7 +181,7 @@ class KTello {
      */
 
     private fun getDistance(distance: Int): Int {
-        return if (!isImperial) distance else Math.round((distance.toFloat() * 2.54).toFloat())
+        return if (!isImperial) distance else (distance.toFloat() * 2.54).toFloat().roundToInt()
     }
 
     private fun isOK(strResult: String?): Boolean {
@@ -189,19 +190,27 @@ class KTello {
 
     @Throws(IOException::class)
     private fun sendCommand(strCommand: String?): String {
-        if (null == strCommand || 0 == strCommand.length)
+        if (null == strCommand || strCommand.isEmpty())
             return "empty command"
         if (!socket!!.isConnected)
             return "disconnected"
-        val receiveData = ByteArray(1024)
-        val sendData = strCommand.toByteArray()
-        val sendPacket = DatagramPacket(sendData, sendData.size, ip, port)
-        socket!!.send(sendPacket)
-        val receivePacket = DatagramPacket(receiveData, receiveData.size)
-        socket!!.receive(receivePacket)
-        val ret = String(receivePacket.data)
-        if (ret.substring(0, 1) == "er") {
-            Log.w("Tello", "Tello $strCommand: $ret")
+
+        var ret = ""
+
+        for(i in 1..3) {
+            val receiveData = ByteArray(1024)
+            val sendData = strCommand.toByteArray()
+            val sendPacket = DatagramPacket(sendData, sendData.size, ip, port)
+            socket!!.send(sendPacket)
+            val receivePacket = DatagramPacket(receiveData, receiveData.size)
+            socket!!.receive(receivePacket)
+            ret = String(receivePacket.data)
+            Log.i("Tello", "sended Command")
+            if (ret.substring(0, 2) == "ok") break
+        }
+
+        if (ret.substring(0, 2) == "er") {
+            Log.w("Tello","Tello $strCommand: $ret")
         }
         println("Tello $strCommand: $ret")
         return ret
@@ -211,5 +220,6 @@ class KTello {
         if (null != socket)
             socket!!.close()
     }
-
 }
+
+class TelloCommandException(msg: String? = null): RuntimeException(msg)
