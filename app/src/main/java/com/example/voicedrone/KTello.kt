@@ -1,6 +1,5 @@
-import android.content.Context
 import android.util.Log
-import android.widget.Toast
+import java.io.File
 import java.io.IOException
 import java.net.DatagramPacket
 import java.net.DatagramSocket
@@ -27,9 +26,7 @@ import kotlin.math.roundToInt
  */
 
 
-class KTello(context: Context) {
-    val context = context
-
+class KTello {
     private var ip: InetAddress? = null
     private var port: Int = 0
     private var socket: DatagramSocket? = null
@@ -41,7 +38,6 @@ class KTello(context: Context) {
     /**
      *  Instrumentation Commands
      */
-
 
     val battery: String
         @Throws(IOException::class)
@@ -205,12 +201,14 @@ class KTello(context: Context) {
             val receivePacket = DatagramPacket(receiveData, receiveData.size)
             socket!!.receive(receivePacket)
             ret = String(receivePacket.data)
-            Log.i("Tello", "sended Command")
+            Log.i("KTello", "sended Command")
             if (ret.substring(0, 2) == "ok") break
         }
 
         if (ret.substring(0, 2) == "er") {
-            Log.w("Tello","Tello $strCommand: $ret")
+            Thread{
+                File("/sdcard/voice_drone/log.txt").writeText("Tello $strCommand: $ret")
+            }.start()
         }
         println("Tello $strCommand: $ret")
         return ret
@@ -221,5 +219,3 @@ class KTello(context: Context) {
             socket!!.close()
     }
 }
-
-class TelloCommandException(msg: String? = null): RuntimeException(msg)

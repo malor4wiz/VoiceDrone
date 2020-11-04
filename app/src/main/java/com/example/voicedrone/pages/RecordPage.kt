@@ -1,4 +1,4 @@
-package com.example.voicedrone
+package com.example.voicedrone.pages
 
 import android.Manifest
 import android.content.Intent
@@ -9,11 +9,13 @@ import android.media.AudioRecord.OnRecordPositionUpdateListener
 import android.media.MediaRecorder
 import android.os.AsyncTask
 import android.os.Bundle
-import android.util.Log
+import android.os.Environment
 import android.view.View
 import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.example.voicedrone.MyWaveFile
+import com.example.voicedrone.R
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.*
@@ -26,11 +28,12 @@ class RecordPage : AppCompatActivity() {
     private val PERMISSIONS_REQUEST_CODE_WRITE_EXTERNAL_STORAGE = 2
 
     var audioRecord : AudioRecord? = null
-    val SAMPLING_RATE = 16000
+    private val SAMPLING_RATE = 16000
     private var bufSize = 0
     private var shortData: ShortArray? = null
     private val wav1 = MyWaveFile()
-    var flag = false
+    private val fileName = Environment.getExternalStorageDirectory().path + "voice_drone/indication.wav"
+    var recordFlag = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -63,7 +66,7 @@ class RecordPage : AppCompatActivity() {
     }
 
     fun onClickRecordButton(v: View?) {
-        if (!flag) {
+        if (!recordFlag) {
             val recordButton = findViewById<Button>(R.id.RecordButton)
             recordButton.text = "STOP"
             startAudioRecord()
@@ -72,7 +75,7 @@ class RecordPage : AppCompatActivity() {
             val recordButton = findViewById<Button>(R.id.RecordButton)
             recordButton.text = "RECORD"
         }
-        flag = !flag
+        recordFlag = !recordFlag
     }
 
     fun onClickRequest(v: View?) {
@@ -87,7 +90,7 @@ class RecordPage : AppCompatActivity() {
 
     //AudioRecordの初期化
     private fun initAudioRecord() {
-        wav1.createFile("/sdcard/voice_drone/indication.wav")
+        wav1.createFile(fileName)
         // AudioRecordオブジェクトを作成
         bufSize = AudioRecord.getMinBufferSize(
             SAMPLING_RATE,
@@ -143,12 +146,12 @@ class RecordPage : AppCompatActivity() {
             var connection: HttpURLConnection? = null
             val sb = StringBuilder()
             try {
-                val stream = File("/sdcard/voice_drone/indication.wav").readBytes()
+                val stream = File(fileName).readBytes()
 
-                //streamをbyte配列に変換し, Base64でエンコード
+                // streamをBase64でエンコード
                 val encodedJpg: String = Base64.getEncoder().encodeToString(stream)
 
-                //jsonにエンコードした画像データを埋め込む
+                // jsonにエンコードした画像データを埋め込む
                 val json: String = String.format("{ \"audio\":\"%s\" } ", encodedJpg)
 
                 val url = URL(uri)
@@ -211,154 +214,3 @@ class RecordPage : AppCompatActivity() {
     }
 }
 
-class MyWaveFile {
-    private val FILESIZE_SEEK = 4
-    private val DATASIZE_SEEK = 40
-    private var raf //リアルタイム処理なのでランダムアクセスファイルクラスを使用する
-            : RandomAccessFile? = null
-    private var recFile //録音後の書き込み、読み込みようファイル
-            : File? = null
-    private var fileName = "/sdcard/voice_drone/indication.wav" //録音ファイルのパス
-    private val RIFF = byteArrayOf(
-        'R'.toByte(),
-        'I'.toByte(),
-        'F'.toByte(),
-        'F'.toByte()
-    ) //wavファイルリフチャンクに書き込むチャンクID用
-    private var fileSize = 36
-    private val WAVE =
-        byteArrayOf('W'.toByte(), 'A'.toByte(), 'V'.toByte(), 'E'.toByte()) //WAV形式でRIFFフォーマットを使用する
-    private val fmt =
-        byteArrayOf('f'.toByte(), 'm'.toByte(), 't'.toByte(), ' '.toByte()) //fmtチャンク　スペースも必要
-    private val fmtSize = 16 //fmtチャンクのバイト数
-    private val fmtID = byteArrayOf(1, 0) // フォーマットID リニアPCMの場合01 00 2byte
-    private val chCount: Short = 1 //チャネルカウント モノラルなので1 ステレオなら2にする
-    private val bytePerSec: Int = 16000 * (fmtSize / 8) * chCount //データ速度
-    private val blockSize =
-        (fmtSize / 8 * chCount).toShort() //ブロックサイズ (Byte/サンプリングレート * チャンネル数)
-    private val bitPerSample: Short = 16 //サンプルあたりのビット数 WAVでは8bitか16ビットが選べる
-    private val data =
-        byteArrayOf('d'.toByte(), 'a'.toByte(), 't'.toByte(), 'a'.toByte()) //dataチャンク
-    private var dataSize = 0 //波形データのバイト数
-    fun createFile(fName: String) {
-        fileName = fName
-        //	ファイルを作成
-        recFile = File(fileName)
-        if (recFile!!.exists()) {
-            recFile!!.delete()
-        }
-        try {
-            recFile!!.createNewFile()
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
-        try {
-            raf = RandomAccessFile(recFile, "rw")
-        } catch (e: FileNotFoundException) {
-            e.printStackTrace()
-        }
-
-        //wavのヘッダを書き込み
-        try {
-            raf!!.seek(0)
-            raf!!.write(RIFF)
-            raf!!.write(littleEndianInteger(fileSize))
-            raf!!.write(WAVE)
-            raf!!.write(fmt)
-            raf!!.write(littleEndianInteger(fmtSize))
-            raf!!.write(fmtID)
-            raf!!.write(littleEndianShort(chCount))
-            raf!!.write(littleEndianInteger(16000)) //サンプリング周波数
-            raf!!.write(littleEndianInteger(bytePerSec))
-            raf!!.write(littleEndianShort(blockSize))
-            raf!!.write(littleEndianShort(bitPerSample))
-            raf!!.write(data)
-            raf!!.write(littleEndianInteger(dataSize))
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
-    }
-
-    private fun littleEndianInteger(i: Int): ByteArray {
-        val buffer = ByteArray(4)
-        buffer[0] = i.toByte()
-        buffer[1] = (i shr 8).toByte()
-        buffer[2] = (i shr 16).toByte()
-        buffer[3] = (i shr 24).toByte()
-        Log.w("bufferInteger:", buffer.toString())
-        return buffer
-    }
-
-    // PCMデータを追記するメソッド
-    fun addBigEndianData(shortData: ShortArray) {
-
-        // ファイルにデータを追記
-        try {
-            raf!!.seek(raf!!.length())
-            raf!!.write(littleEndianShorts(shortData))
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
-
-        // ファイルサイズを更新
-        updateFileSize()
-
-        // データサイズを更新
-        updateDataSize()
-    }
-
-    // ファイルサイズを更新
-    private fun updateFileSize() {
-        fileSize = (recFile!!.length() - 8).toInt()
-        val fileSizeBytes = littleEndianInteger(fileSize)
-        try {
-            raf!!.seek(FILESIZE_SEEK.toLong())
-            raf!!.write(fileSizeBytes)
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
-    }
-
-    // データサイズを更新
-    private fun updateDataSize() {
-        dataSize = (recFile!!.length() - 44).toInt()
-        val dataSizeBytes = littleEndianInteger(dataSize)
-        try {
-            raf!!.seek(DATASIZE_SEEK.toLong())
-            raf!!.write(dataSizeBytes)
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
-    }
-
-    // short型変数をリトルエンディアンのbyte配列に変更
-    private fun littleEndianShort(s: Short): ByteArray {
-        val buffer = ByteArray(2)
-        buffer[0] = s.toByte()
-        buffer[1] = (s.toInt() shr 8).toByte()
-        Log.w("bufferShort:", buffer.toString())
-        return buffer
-    }
-
-    // short型配列をリトルエンディアンのbyte配列に変更
-    private fun littleEndianShorts(s: ShortArray): ByteArray {
-        val buffer = ByteArray(s.size * 2)
-        var i = 0
-        while (i < s.size) {
-            buffer[2 * i] = s[i].toByte()
-            buffer[2 * i + 1] = (s[i].toInt() shr 8).toByte()
-            i++
-        }
-        Log.w("bufferShorts:", buffer.toString())
-        return buffer
-    }
-
-    // ファイルを閉じる
-    fun close() {
-        try {
-            raf!!.close()
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
-    }
-}

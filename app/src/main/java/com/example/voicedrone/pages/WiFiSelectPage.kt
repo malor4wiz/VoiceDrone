@@ -1,8 +1,11 @@
-package com.example.voicedrone
+package com.example.voicedrone.pages
 
 import android.Manifest
 import android.app.AlertDialog
-import android.content.*
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.net.wifi.ScanResult
 import android.net.wifi.SupplicantState
@@ -14,6 +17,9 @@ import android.view.View
 import android.widget.*
 import android.widget.AdapterView.OnItemClickListener
 import androidx.appcompat.app.AppCompatActivity
+import com.example.voicedrone.Connection
+import com.example.voicedrone.EnumActivity
+import com.example.voicedrone.R
 
 var internetWiFiID = ""
 var droneWiFiID = ""
@@ -33,7 +39,7 @@ class WiFiSelectPage : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.wifi_select_page)
 
-        var manager : WifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+        val manager : WifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
         val info : WifiInfo = manager.connectionInfo
 
         val wifiScanReceiver = object : BroadcastReceiver() {
@@ -62,16 +68,16 @@ class WiFiSelectPage : AppCompatActivity() {
 
         applicationContext.registerReceiver(wifiScanReceiver, IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION))
         val scanResult = manager.startScan()
-
-        Log.v("scanResult", scanResult.toString())
+        if (!scanResult) {
+            Toast.makeText(this, "WiFiのScanに失敗しました", Toast.LENGTH_LONG).show()
+        }
 
         if(info.supplicantState == SupplicantState.COMPLETED) {
             val ssid = info.ssid
             val nowConnectingWiFi = findViewById<TextView>(R.id.nowConnectingWiFi)
             nowConnectingWiFi.text = ssid
-            Log.i("SSID", ssid)
         } else {
-            Log.i("SSID", "not supplied")
+            Log.i("WiFiSelectPage", "SSID not supplied")
         }
 
         // リスト項目とListViewを対応付けるArrayAdapterを用意する
@@ -88,9 +94,10 @@ class WiFiSelectPage : AppCompatActivity() {
         internetPassword = findViewById(R.id.InternetPassword)
 
         listView.onItemClickListener = OnItemClickListener { parent, view, position, id ->
+            val clickedWiFiName = parent.getItemAtPosition(position) as String
             AlertDialog.Builder(this)
                 .setTitle("WiFi-setting")
-                .setMessage("どちらか選択してください。")
+                .setMessage("$clickedWiFiName: どちらか選択してください。")
                 .setPositiveButton("Internet-WiFi") { dialog, which ->
                     internetWiFi?.text = adapter?.getItem(position)
                 }
@@ -102,7 +109,7 @@ class WiFiSelectPage : AppCompatActivity() {
 
         val connectButton = findViewById<Button>(R.id.connectButton)
         connectButton.setOnClickListener { _ ->
-            Log.i("connectionButton", "Clicked")
+            Log.i("WiFiSelectPage", "connectButton Clicked")
             internetWiFiID = internetWiFi?.text.toString()
             droneWiFiID = droneWiFi?.text.toString()
 
@@ -112,11 +119,10 @@ class WiFiSelectPage : AppCompatActivity() {
             if((internetWiFiID != "選択してください") && (droneWiFiID != "選択してください")){
                 val intent = Intent(application, RecordPage::class.java)
                 intent.putExtra("activity", EnumActivity.WiFiSelect)
-                intent.putExtra("recordPageFirst", true)
 
-                val connection = Connection(this, internetWiFi?.text.toString(), "326824658235a")
-                connection.connect{WiFiConnected(intent)}
-
+                val wiFiConnected: (Intent) -> Unit = {activityIntent -> startActivity(activityIntent)}
+                val connection = Connection(this, internetWiFiID, internetWiFiPass)
+                connection.connect{wiFiConnected(intent)}
             } else {
                 Toast.makeText(applicationContext, "WiFiが選択されていません", Toast.LENGTH_SHORT).show()
             }
@@ -140,21 +146,13 @@ class WiFiSelectPage : AppCompatActivity() {
     }
 
     private fun scanWifi() {
-        var manager : WifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+        val manager : WifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
         val array: MutableList<ScanResult> = manager.scanResults
-        Log.i("scanResults", array.toString())
         var newWifis = arrayOf<String>()
         for (data in array) {
             if(!wifis.contains(data.SSID)) {
                 newWifis += data.SSID
             }
-            Log.i("result", data.SSID)
-        }
-        for(a in wifis){
-            Log.i("wifis", a)
-        }
-        for(a in newWifis){
-            Log.i("newWifis", a)
         }
 
         if(newWifis.isNotEmpty()) {
@@ -163,9 +161,5 @@ class WiFiSelectPage : AppCompatActivity() {
 
         adapter?.notifyDataSetChanged()
         wifis += newWifis
-    }
-
-    fun WiFiConnected(intent: Intent) {
-        startActivity(intent)
     }
 }

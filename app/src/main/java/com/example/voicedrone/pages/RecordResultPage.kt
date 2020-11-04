@@ -1,4 +1,4 @@
-package com.example.voicedrone
+package com.example.voicedrone.pages
 
 import KTello
 import android.content.Intent
@@ -9,6 +9,7 @@ import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.example.voicedrone.*
 
 class RecordResultPage : AppCompatActivity() {
     private var tello : KTello? = null
@@ -40,18 +41,18 @@ class RecordResultPage : AppCompatActivity() {
             val rightRecognitnionRateFloat = rightRecognitionRate.toFloat()
             when {
                 rightRecognitnionRateFloat > 0.6 -> {
-                    Log.v("orderIsRight", "true")
+                    Log.i("RecordResultPage", "orderIsRight is true")
                     orderIsRight = true
                 }
                 rightRecognitnionRateFloat > 0.4 -> {
-                    Log.v("orderValid", "false")
+                    Log.i("RecordResultPage", "orderValid is false")
                     orderValid = false
                     val yourOrderSentence = findViewById<TextView>(R.id.yourOrderSentence)
                     yourOrderSentence.text = "has Not been carrying out "
                     voiceButton?.isEnabled = true
                 }
                 else -> {
-                    Log.v("orderIsRight", "false")
+                    Log.v("RecordResultPage", "orderIsRight is false")
                 }
             }
 
@@ -61,15 +62,14 @@ class RecordResultPage : AppCompatActivity() {
         }
 
         if (orderValid) {
-            Log.v("Connection", "drone")
             initTello()
         }
     }
 
     private fun initTello() {
-        tello = KTello(applicationContext)
+        Log.i("RecordResultPage", "initTello")
+        tello = KTello()
         KTelloHandler.tello = tello
-        Log.v("initTello", "tello")
         Thread{
             // ドローンWiFiに接続切り替えするまで待っている
             Thread.sleep(5000)
@@ -77,7 +77,6 @@ class RecordResultPage : AppCompatActivity() {
                 tello?.connect()
                 Thread.sleep(3000)
                 if (tello?.isConnected!!) {
-                    Log.v("takeoff", "tello")
                     tello?.takeOff()
                     Thread.sleep(3000)
                     if (orderIsRight) {
@@ -114,9 +113,11 @@ class RecordResultPage : AppCompatActivity() {
         }.start()
         val intent = Intent(application, RecordPage::class.java)
         intent.putExtra("activity", EnumActivity.RecordResult)
+
+        val wiFiConnected: (Intent) -> Unit = {activityIntent -> startActivity(activityIntent)}
         val connection = Connection(this, internetWiFiID, internetWiFiPass)
         connection.disable()
-        connection.connect{WiFiConnected(intent)}
+        connection.connect{wiFiConnected(intent)}
     }
 
     fun onClickTouchButton(view: View?) {
@@ -130,10 +131,6 @@ class RecordResultPage : AppCompatActivity() {
             tello?.close()
         }.start()
         val intent = Intent(application, HomePage::class.java)
-        startActivity(intent)
-    }
-
-    private fun WiFiConnected(intent: Intent) {
         startActivity(intent)
     }
 }

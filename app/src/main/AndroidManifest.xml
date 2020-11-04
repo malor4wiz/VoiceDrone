@@ -17,19 +17,19 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".HomePage">
+        <activity android:name=".pages.HomePage">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".WiFiSelectPage"
+        <activity android:name=".pages.WiFiSelectPage"
             android:windowSoftInputMode="adjustPan"/>
-        <activity android:name=".RecordPage" />
-        <activity android:name=".TouchPage"
+        <activity android:name=".pages.RecordPage" />
+        <activity android:name=".pages.TouchPage"
             android:screenOrientation="landscape"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
-        <activity android:name=".RecordResultPage" />
+        <activity android:name=".pages.RecordResultPage" />
     </application>
 
 </manifest>

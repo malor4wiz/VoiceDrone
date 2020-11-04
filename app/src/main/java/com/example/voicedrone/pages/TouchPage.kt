@@ -1,4 +1,4 @@
-package com.example.voicedrone
+package com.example.voicedrone.pages
 
 import KTello
 import android.os.Bundle
@@ -7,6 +7,9 @@ import android.view.View
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.example.voicedrone.EnumActivity
+import com.example.voicedrone.KTelloHandler
+import com.example.voicedrone.R
 import java.lang.Exception
 
 
@@ -44,7 +47,7 @@ class TouchPage : AppCompatActivity() {
 
         when(intent.getSerializableExtra("activity")) {
             EnumActivity.Home -> {
-                tello = KTello(applicationContext)
+                tello = KTello()
 
                 Thread{
                     try {

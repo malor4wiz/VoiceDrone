@@ -15,47 +15,50 @@ class Connection(private val context: Context, private val wifiSSID: String, pri
 
     private var flag = true
 
+    // 新しいWiFiに接続できたかどうか判定するためにBroadcastReceiverを登録し、addNetworkへ
     fun connect() {
-        Log.i("i", "connect")
+        Log.i("Connection", "connect")
         val intentFilter = IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION)
         val receiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 if (isConnectedToCorrectSSID()) {
-                    Log.i("i","Successfully connected to the device.")
+                    Log.i("Connection","Successfully connected to the device.")
                 } else {
-                    Log.w("w","Still not connected to ${wifiSSID}. Waiting a little bit more...")
+                    Log.w("Connection","Still not connected to ${wifiSSID}. Waiting a little bit more...")
                 }
             }
         }
-        Log.v("v","Registering connection receiver...")
+        Log.i("Connection","Registering connection receiver...")
         context.registerReceiver(receiver, intentFilter)
         addNetwork()
     }
 
+    // 新しいWiFiに接続できたかどうか判定するためにBroadcastReceiverを登録し、addNetworkへ
     fun connect(callback: () -> Unit?) {
-        Log.v("v", "connect")
+        Log.i("Connection", "connect")
         val intentFilter = IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION)
         val receiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 if (isConnectedToCorrectSSID()) {
-                    Log.i("i","Successfully connected to the device.")
+                    Log.i("Connection","Successfully connected to the device.")
                     if (flag) {
-                        Log.i("i", "Connection Callback")
+                        Log.i("Connection", "Connection Callback")
                         callback()
                         flag = !flag
                     }
                 } else {
-                    Log.w("w","Still not connected to ${wifiSSID}. Waiting a little bit more...")
+                    Log.w("Connection","Still not connected to ${wifiSSID}. Waiting a little bit more...")
                 }
             }
         }
-        Log.i("i","Registering connection receiver...")
+        Log.i("Connection","Registering connection receiver...")
         context.registerReceiver(receiver, intentFilter)
         addNetwork()
     }
 
+    // 新しいWiFiの情報を入れ、接続する
     private fun addNetwork() {
-        Log.i("i","Connecting to ${wifiSSID}...")
+        Log.i("Connection","Connecting to ${wifiSSID}...")
         val wc = WifiConfiguration()
         wc.SSID = "\"" + wifiSSID + "\""
         wc.preSharedKey = "\"" + wifiPassword + "\""
@@ -63,22 +66,22 @@ class Connection(private val context: Context, private val wifiSSID: String, pri
         val netId = wifiManager.addNetwork(wc)
         if (netId != -1) {
             if (!wifiManager.enableNetwork(netId, true)) {
-                Log.e("e","Failed to connect to the device.")
+                Log.e("Connection","Failed to connect to the device.")
             }
         } else {
-            Log.e("e","Failed to connect to the device. addNetwork() returned -1")
+            Log.e("Connection","Failed to connect to the device. addNetwork() returned -1")
         }
     }
 
     private fun isConnectedToCorrectSSID(): Boolean {
         val currentSSID = wifiManager.connectionInfo.ssid ?: return false
-        Log.i("i","Connected to $currentSSID")
+        Log.i("Connection","Connected to $currentSSID")
         return currentSSID == "\"${wifiSSID}\""
     }
 
-    //WiFiに接続途中などの場合は、
+    // WiFiが接続途中などの場合に新しいWiFiに接続をしようとするとエラーが発生するので、一度現在のWiFiの接続を切るために用いる
     fun disable() {
-        Log.i("i", "Current Network is disabled")
+        Log.i("Connection", "Current Network is disabled")
         val netid = wifiManager.connectionInfo.networkId
         wifiManager.disableNetwork(netid)
     }
