@@ -2,10 +2,8 @@ package com.example.voicedrone.pages
 
 import android.Manifest
 import android.app.AlertDialog
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.net.wifi.ScanResult
 import android.net.wifi.SupplicantState
@@ -20,6 +18,8 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.voicedrone.Connection
 import com.example.voicedrone.EnumActivity
 import com.example.voicedrone.R
+import java.util.*
+
 
 var internetWiFiID = ""
 var droneWiFiID = ""
@@ -28,8 +28,10 @@ var droneWiFiPass = ""
 
 class WiFiSelectPage : AppCompatActivity() {
     private val PERMISSIONS_REQUEST_CODE_ACCESS_COARSE_LOCATION = 0
-    private var wifis = arrayOf<String>()
+
     private var adapter : ArrayAdapter<String>? = null
+    private var wifiScanTimer: Timer? = null
+
     private var internetWiFi : TextView? = null
     private var droneWiFi : TextView? = null
     private var internetPassword : EditText? = null
@@ -42,16 +44,11 @@ class WiFiSelectPage : AppCompatActivity() {
         val manager : WifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
         val info : WifiInfo = manager.connectionInfo
 
-        val wifiScanReceiver = object : BroadcastReceiver() {
-
-            override fun onReceive(context: Context, intent: Intent) {
-                val success = intent.getBooleanExtra(WifiManager.EXTRA_RESULTS_UPDATED, false)
-                if (success) {
-                    // 既に許可されているか確認
+        val timerTask: TimerTask = object : TimerTask() {
+            override fun run() {
+                if (manager.wifiState == WifiManager.WIFI_STATE_ENABLED) {
                     if (checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION)
                         != PackageManager.PERMISSION_GRANTED) {
-                        // 許可されていなかったらリクエストする
-                        // ダイアログが表示される
                         requestPermissions(
                             arrayOf(
                                 Manifest.permission.ACCESS_COARSE_LOCATION
@@ -59,18 +56,22 @@ class WiFiSelectPage : AppCompatActivity() {
                             PERMISSIONS_REQUEST_CODE_ACCESS_COARSE_LOCATION);
                         return;
                     } else {
-                        // 許可されていた場合
-                        scanWifi()
+                        val scanResult = manager.startScan()
+                        runOnUiThread{
+                            if (!scanResult) {
+                                Toast.makeText(applicationContext, "WiFiのScanに失敗しました", Toast.LENGTH_LONG).show()
+                            }
+                            scanWifi()
+                        }
                     }
                 }
             }
         }
 
-        applicationContext.registerReceiver(wifiScanReceiver, IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION))
-        val scanResult = manager.startScan()
-        if (!scanResult) {
-            Toast.makeText(this, "WiFiのScanに失敗しました", Toast.LENGTH_LONG).show()
-        }
+        Thread{
+            wifiScanTimer = Timer(true)
+            wifiScanTimer?.schedule(timerTask, 0, 10000)
+        }.start()
 
         if(info.supplicantState == SupplicantState.COMPLETED) {
             val ssid = info.ssid
@@ -123,6 +124,10 @@ class WiFiSelectPage : AppCompatActivity() {
                 val wiFiConnected: (Intent) -> Unit = {activityIntent -> startActivity(activityIntent)}
                 val connection = Connection(this, internetWiFiID, internetWiFiPass)
                 connection.connect{wiFiConnected(intent)}
+
+                Thread{
+                    wifiScanTimer?.cancel()
+                }.start()
             } else {
                 Toast.makeText(applicationContext, "WiFiが選択されていません", Toast.LENGTH_SHORT).show()
             }
@@ -148,18 +153,13 @@ class WiFiSelectPage : AppCompatActivity() {
     private fun scanWifi() {
         val manager : WifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
         val array: MutableList<ScanResult> = manager.scanResults
-        var newWifis = arrayOf<String>()
-        for (data in array) {
-            if(!wifis.contains(data.SSID)) {
-                newWifis += data.SSID
-            }
-        }
 
-        if(newWifis.isNotEmpty()) {
-            adapter?.addAll(*newWifis)
+        adapter?.clear()
+
+        for (data in array) {
+            adapter?.add(data.SSID)
         }
 
         adapter?.notifyDataSetChanged()
-        wifis += newWifis
     }
 }

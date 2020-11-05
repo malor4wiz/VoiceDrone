@@ -13,7 +13,6 @@ import com.example.voicedrone.KTelloHandler
 import com.example.voicedrone.R
 import java.lang.Exception
 
-
 class TouchPage : AppCompatActivity() {
     private var tello : KTello? = null
     private var connectionLabel: TextView? = null
@@ -89,10 +88,10 @@ class TouchPage : AppCompatActivity() {
     private fun askTello(){
         while (askFlag){
             try {
-                val battery: String? = tello?.battery?.substring(0, 2) + "%"
+                val battery: String? = tello?.battery + "%"
 
                 runOnUiThread{
-                    if (battery != "ok%") {
+                    if (battery?.substring(0, 2) != "ok") {
                         batteryLabel?.text = battery
                     }
                 }

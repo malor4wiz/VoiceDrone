@@ -1,9 +1,12 @@
+import android.os.Environment
 import android.util.Log
-import java.io.File
+import java.io.FileWriter
 import java.io.IOException
 import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
+import java.text.SimpleDateFormat
+import java.util.*
 import kotlin.math.roundToInt
 
 /**
@@ -207,10 +210,21 @@ class KTello {
 
         if (ret.substring(0, 2) == "er") {
             Thread{
-                File("/sdcard/voice_drone/log.txt").writeText("Tello $strCommand: $ret")
+                try {
+                    val now = Date()
+                    val currentTimeText = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.JAPANESE).format(now)
+                    val fileWriter = FileWriter(
+                        Environment.getExternalStorageDirectory().path + "/voice_drone/error_log.txt",
+                        true
+                    )
+                    fileWriter.write("$currentTimeText Tello $strCommand: ${ret.substring(0, 20)} \n")
+                    fileWriter.close()
+                } catch (e: IOException) {
+                    Log.e("KTello", "ログを書き込めません")
+                }
             }.start()
         }
-        println("Tello $strCommand: $ret")
+        Log.i("KTello","Tello $strCommand: $ret")
         return ret
     }
 
