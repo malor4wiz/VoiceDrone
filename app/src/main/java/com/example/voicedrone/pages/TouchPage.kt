@@ -1,6 +1,7 @@
 package com.example.voicedrone.pages
 
 import KTello
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -88,7 +89,7 @@ class TouchPage : AppCompatActivity() {
     private fun askTello(){
         while (askFlag){
             try {
-                val battery: String? = tello?.battery + "%"
+                val battery: String? = tello?.battery?.substring(0, 2) + "%"
 
                 runOnUiThread{
                     if (battery != "ok%") {
@@ -98,10 +99,10 @@ class TouchPage : AppCompatActivity() {
 
                 Thread.sleep(500)
 
-                val time: String? = tello?.time
+                val time: String? = tello?.time?.substring(0, 3)
 
                 runOnUiThread{
-                    if (time != "ok") {
+                    if (time?.substring(0, 2) != "ok") {
                         timeLabel?.text = time
                     }
                 }
@@ -114,57 +115,57 @@ class TouchPage : AppCompatActivity() {
     }
 
     fun takeoffBtnClicked(view: View?) {
-        Log.i("takeoffBtnClicked", "View")
+        Log.i("TouchPage", "takeoffBtnClicked")
         telloAction(TelloActions.TAKEOFF)
     }
 
     fun landBtnClicked(view: View?) {
-        Log.i("landBtnClicked", "View")
+        Log.i("TouchPage", "landBtnClicked")
         telloAction(TelloActions.LAND)
     }
 
     fun endBtnClicked(view: View?) {
-        Log.i("endBtnClicked", "View")
+        Log.i("TouchPage", "endBtnClicked")
         telloAction(TelloActions.END)
     }
 
     fun upBtnClicked(view: View?) {
-        Log.i("upBtnClicked", "View")
+        Log.i("TouchPage", "upBtnClicked")
         telloAction(TelloActions.UP)
     }
 
     fun ccwBtnClicked(view: View?) {
-        Log.i("ccwBtnClicked", "View")
+        Log.i("TouchPage", "ccwBtnClicked")
         telloAction(TelloActions.CCW)
     }
 
     fun downBtnClicked(view: View?) {
-        Log.i("downBtnClicked", "View")
+        Log.i("TouchPage", "downBtnClicked")
         telloAction(TelloActions.DOWN)
     }
 
     fun cwBtnClicked(view: View?) {
-        Log.i("cwBtnClicked", "View")
+        Log.i("TouchPage", "cwBtnClicked")
         telloAction(TelloActions.CW)
     }
 
     fun forwardBtnClicked(view: View?) {
-        Log.i("forwardBtnClicked", "View")
+        Log.i("TouchPage", "forwardBtnClicked")
         telloAction(TelloActions.FORWARD)
     }
 
     fun leftBtnClicked(view: View?) {
-        Log.i("leftBtnClicked", "View")
+        Log.i("TouchPage", "leftBtnClicked")
         telloAction(TelloActions.LEFT)
     }
 
     fun backBtnClicked(view: View?) {
-        Log.i("backBtnClicked", "View")
+        Log.i("TouchPage", "backBtnClicked")
         telloAction(TelloActions.BACK)
     }
 
     fun rightBtnClicked(view: View?) {
-        Log.i("rightBtnClicked", "View")
+        Log.i("TouchPage", "rightBtnClicked")
         telloAction(TelloActions.RIGHT)
     }
 
@@ -178,6 +179,10 @@ class TouchPage : AppCompatActivity() {
                         TelloActions.END -> {
                             askFlag = false
                             tello?.close()
+                            runOnUiThread{
+                                val intent = Intent(applicationContext, HomePage::class.java)
+                                startActivity(intent)
+                            }
                         }
                         TelloActions.UP -> tello?.up(MOVEMENT_RANGE)
                         TelloActions.CCW -> tello?.ccw(MOVEMENT_RANGE)

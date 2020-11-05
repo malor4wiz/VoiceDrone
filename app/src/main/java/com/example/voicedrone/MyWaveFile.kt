@@ -1,6 +1,5 @@
 package com.example.voicedrone
 
-import android.os.Environment
 import android.util.Log
 import java.io.File
 import java.io.FileNotFoundException
@@ -12,12 +11,8 @@ class MyWaveFile {
     private val DATASIZE_SEEK = 40
     private var raf: RandomAccessFile? = null //リアルタイム処理なのでランダムアクセスファイルクラスを使用する
     private var recFile: File? = null //録音後の書き込み、読み込みようファイル
-    private val RIFF = byteArrayOf(
-        'R'.toByte(),
-        'I'.toByte(),
-        'F'.toByte(),
-        'F'.toByte()
-    ) //wavファイルリフチャンクに書き込むチャンクID用
+    private val RIFF =
+        byteArrayOf('R'.toByte(), 'I'.toByte(), 'F'.toByte(), 'F'.toByte()) //wavファイルリフチャンクに書き込むチャンクID用
     private var fileSize = 36
     private val WAVE =
         byteArrayOf('W'.toByte(), 'A'.toByte(), 'V'.toByte(), 'E'.toByte()) //WAV形式でRIFFフォーマットを使用する
@@ -27,8 +22,7 @@ class MyWaveFile {
     private val fmtID = byteArrayOf(1, 0) // フォーマットID リニアPCMの場合01 00 2byte
     private val chCount: Short = 1 //チャネルカウント モノラルなので1 ステレオなら2にする
     private val bytePerSec: Int = 16000 * (fmtSize / 8) * chCount //データ速度
-    private val blockSize =
-        (fmtSize / 8 * chCount).toShort() //ブロックサイズ (Byte/サンプリングレート * チャンネル数)
+    private val blockSize = (fmtSize / 8 * chCount).toShort() //ブロックサイズ (Byte/サンプリングレート * チャンネル数)
     private val bitPerSample: Short = 16 //サンプルあたりのビット数 WAVでは8bitか16ビットが選べる
     private val data =
         byteArrayOf('d'.toByte(), 'a'.toByte(), 't'.toByte(), 'a'.toByte()) //dataチャンク

@@ -10,6 +10,7 @@ import android.media.MediaRecorder
 import android.os.AsyncTask
 import android.os.Bundle
 import android.os.Environment
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.Toast
@@ -32,7 +33,7 @@ class RecordPage : AppCompatActivity() {
     private var bufSize = 0
     private var shortData: ShortArray? = null
     private val wav1 = MyWaveFile()
-    private val fileName = Environment.getExternalStorageDirectory().path + "voice_drone/indication.wav"
+    private val fileName = Environment.getExternalStorageDirectory().path + "/voice_drone/indication.wav"
     var recordFlag = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
