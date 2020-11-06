@@ -33,7 +33,7 @@ class RecordResultPage : AppCompatActivity() {
         val rightRecognitionRate = intent.getStringExtra("rightRecognitionRate")
         val leftRecognitionRate = intent.getStringExtra("leftRecognitionRate")
 
-        val connection = Connection(this, droneWiFiID, droneWiFiPass)
+        val connection = Connection(this, WiFiData.droneWiFiID, WiFiData.droneWiFiPass)
         connection.disable()
         connection.connect()
 
@@ -115,7 +115,7 @@ class RecordResultPage : AppCompatActivity() {
         intent.putExtra("activity", EnumActivity.RecordResult)
 
         val wiFiConnected: (Intent) -> Unit = {activityIntent -> startActivity(activityIntent)}
-        val connection = Connection(this, internetWiFiID, internetWiFiPass)
+        val connection = Connection(this, WiFiData.internetWiFiID, WiFiData.internetWiFiPass)
         connection.disable()
         connection.connect{wiFiConnected(intent)}
     }

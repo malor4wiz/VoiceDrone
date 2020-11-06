@@ -18,13 +18,8 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.voicedrone.Connection
 import com.example.voicedrone.EnumActivity
 import com.example.voicedrone.R
+import com.example.voicedrone.WiFiData
 import java.util.*
-
-
-var internetWiFiID = ""
-var droneWiFiID = ""
-var internetWiFiPass = ""
-var droneWiFiPass = ""
 
 class WiFiSelectPage : AppCompatActivity() {
     private val PERMISSIONS_REQUEST_CODE_ACCESS_COARSE_LOCATION = 0
@@ -111,18 +106,18 @@ class WiFiSelectPage : AppCompatActivity() {
         val connectButton = findViewById<Button>(R.id.connectButton)
         connectButton.setOnClickListener { _ ->
             Log.i("WiFiSelectPage", "connectButton Clicked")
-            internetWiFiID = internetWiFi?.text.toString()
-            droneWiFiID = droneWiFi?.text.toString()
+            WiFiData.internetWiFiID = internetWiFi?.text.toString()
+            WiFiData.droneWiFiID = droneWiFi?.text.toString()
 
-            internetWiFiPass = internetPassword?.text.toString()
-            droneWiFiPass = dronePassword?.text.toString()
+            WiFiData.internetWiFiPass = internetPassword?.text.toString()
+            WiFiData.droneWiFiPass = dronePassword?.text.toString()
 
-            if((internetWiFiID != "選択してください") && (droneWiFiID != "選択してください")){
+            if((WiFiData.internetWiFiID != "選択してください") && (WiFiData.droneWiFiID != "選択してください")){
                 val intent = Intent(application, RecordPage::class.java)
                 intent.putExtra("activity", EnumActivity.WiFiSelect)
 
                 val wiFiConnected: (Intent) -> Unit = {activityIntent -> startActivity(activityIntent)}
-                val connection = Connection(this, internetWiFiID, internetWiFiPass)
+                val connection = Connection(this, WiFiData.internetWiFiID, WiFiData.internetWiFiPass)
                 connection.connect{wiFiConnected(intent)}
 
                 Thread{
