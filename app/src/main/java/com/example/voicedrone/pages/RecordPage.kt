@@ -79,16 +79,6 @@ class RecordPage : AppCompatActivity() {
         recordFlag = !recordFlag
     }
 
-    fun onClickRequest(v: View?) {
-        try {
-            UploadHttpRequest().execute(
-                "http://35.200.72.132/speech"
-            )
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
-    }
-
     //AudioRecordの初期化
     private fun initAudioRecord() {
         wav1.createFile(fileName)

@@ -17,17 +17,4 @@
         app:layout_constraintTop_toTopOf="parent"
         android:onClick="onClickRecordButton"
         android:soundEffectsEnabled="false"/>
-
-    <Button
-        android:id="@+id/RequestButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Request"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.501"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/RecordButton"
-        app:layout_constraintVertical_bias="0.286"
-        android:onClick="onClickRequest"/>
 </androidx.constraintlayout.widget.ConstraintLayout>
