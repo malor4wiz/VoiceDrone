@@ -112,8 +112,13 @@ class RecordPage : AppCompatActivity() {
     }
 
     private fun startAudioRecord() {
-        audioRecord!!.startRecording()
-        audioRecord!!.read(shortData!!, 0, bufSize / 2)
+        try{
+            audioRecord!!.startRecording()
+            audioRecord!!.read(shortData!!, 0, bufSize / 2)
+        } catch (e: Exception) {
+            Toast.makeText(applicationContext, e.toString(), Toast.LENGTH_LONG).show()
+        }
+
     }
 
     //オーディオレコードを停止する
