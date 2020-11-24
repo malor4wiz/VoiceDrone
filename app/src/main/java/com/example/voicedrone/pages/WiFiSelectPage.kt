@@ -39,6 +39,23 @@ class WiFiSelectPage : AppCompatActivity() {
         val manager : WifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
         val info : WifiInfo = manager.connectionInfo
 
+        if(WiFiData.droneWiFiID != "" && WiFiData.internetWiFiID != "") {
+            AlertDialog.Builder(this)
+                .setCancelable(false)
+                .setTitle("Saved-WiFi")
+                .setMessage("保存されているWiFIデータを使いますか？\n\n" +
+                        "InternetWiFiID: ${WiFiData.internetWiFiID}\n" +
+                        "DroneWiFiID: ${WiFiData.droneWiFiID}")
+                .setPositiveButton("Yes") { _ , _ ->
+                    val intent = Intent(application, RecordPage::class.java)
+                    intent.putExtra("activity", EnumActivity.WiFiSelect)
+                    connectInternetWiFi(intent)
+                    startActivity(intent)
+                }
+                .setNegativeButton("No") { _ , _ -> }
+                .show()
+        }
+
         val timerTask: TimerTask = object : TimerTask() {
             override fun run() {
                 if (manager.wifiState == WifiManager.WIFI_STATE_ENABLED) {
@@ -116,9 +133,7 @@ class WiFiSelectPage : AppCompatActivity() {
                 val intent = Intent(application, RecordPage::class.java)
                 intent.putExtra("activity", EnumActivity.WiFiSelect)
 
-                val wiFiConnected: (Intent) -> Unit = {activityIntent -> startActivity(activityIntent)}
-                val connection = Connection(this, WiFiData.internetWiFiID, WiFiData.internetWiFiPass)
-                connection.connect{wiFiConnected(intent)}
+                connectInternetWiFi(intent)
 
                 Thread{
                     wifiScanTimer?.cancel()
@@ -150,11 +165,16 @@ class WiFiSelectPage : AppCompatActivity() {
         val array: MutableList<ScanResult> = manager.scanResults
 
         adapter?.clear()
-
         for (data in array) {
             adapter?.add(data.SSID)
         }
-
         adapter?.notifyDataSetChanged()
+    }
+
+    private fun connectInternetWiFi(intent : Intent) {
+        val wiFiConnected: (Intent) -> Unit = {activityIntent -> startActivity(activityIntent)}
+        val connection = Connection(this, WiFiData.internetWiFiID, WiFiData.internetWiFiPass)
+        connection.disable()
+        connection.connect{wiFiConnected(intent)}
     }
 }
