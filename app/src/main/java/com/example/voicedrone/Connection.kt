@@ -4,9 +4,11 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.net.wifi.SupplicantState
 import android.net.wifi.WifiConfiguration
 import android.net.wifi.WifiManager
 import android.util.Log
+import android.widget.TextView
 
 class Connection(private val context: Context, private val wifiSSID: String, private val wifiPassword: String) {
 
@@ -64,6 +66,7 @@ class Connection(private val context: Context, private val wifiSSID: String, pri
         wc.preSharedKey = "\"" + wifiPassword + "\""
         wc.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK)
         val netId = wifiManager.addNetwork(wc)
+        wifiManager.enableNetwork(netId, true)
         if (netId != -1) {
             if (!wifiManager.enableNetwork(netId, true)) {
                 Log.e("Connection","Failed to connect to the device.")
@@ -74,9 +77,16 @@ class Connection(private val context: Context, private val wifiSSID: String, pri
     }
 
     private fun isConnectedToCorrectSSID(): Boolean {
-        val currentSSID = wifiManager.connectionInfo.ssid ?: return false
-        Log.i("Connection","Connected to $currentSSID")
-        return currentSSID == "\"${wifiSSID}\""
+        val info = wifiManager.connectionInfo
+
+        if(info.supplicantState == SupplicantState.COMPLETED) {
+            val currentSSID = info.ssid ?: return false
+            Log.i("Connection","Connected to $currentSSID")
+            return currentSSID == "\"${wifiSSID}\""
+        } else {
+            Log.i("Connection", "SSID not supplied")
+            return false
+        }
     }
 
     // WiFiが接続途中などの場合に新しいWiFiに接続をしようとするとエラーが発生するので、一度現在のWiFiの接続を切るために用いる
