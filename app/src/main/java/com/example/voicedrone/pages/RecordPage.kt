@@ -33,7 +33,7 @@ class RecordPage : AppCompatActivity() {
     private var bufSize = 0
     private var shortData: ShortArray? = null
     private val wav1 = MyWaveFile()
-    private val fileName = Environment.getExternalStorageDirectory().path + "/voice_drone/indication.wav"
+    private val fileName = Environment.getExternalStorageDirectory().path + "/Music/indication.wav"
     var recordFlag = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
