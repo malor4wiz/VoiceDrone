@@ -34,6 +34,7 @@ class RecordPage : AppCompatActivity() {
     private var shortData: ShortArray? = null
     private val wav1 = MyWaveFile()
     private val fileName = Environment.getExternalStorageDirectory().path + "/voice_drone/indication.wav"
+
     var recordFlag = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -123,8 +124,8 @@ class RecordPage : AppCompatActivity() {
 
     //オーディオレコードを停止する
     private fun stopAudioRecord() {
-        audioRecord!!.stop()
-        audioRecord!!.release()
+        audioRecord?.stop()
+        audioRecord?.release()
         wav1.close()
 
         try {

@@ -142,7 +142,7 @@ class MyWaveFile {
     // ファイルを閉じる
     fun close() {
         try {
-            raf!!.close()
+            raf?.close()
         } catch (e: IOException) {
             e.printStackTrace()
         }
