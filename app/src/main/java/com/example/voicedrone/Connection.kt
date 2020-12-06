@@ -16,7 +16,7 @@ class Connection(private val context: Context, private val wifiSSID: String, pri
     private var flag = true
 
     // 新しいWiFiに接続できたかどうか判定するためにBroadcastReceiverを登録し、addNetworkへ
-    fun connect() {
+    fun connect(type : String) {
         Log.i("Connection", "connect")
         val intentFilter = IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION)
         val receiver = object : BroadcastReceiver() {
@@ -30,11 +30,11 @@ class Connection(private val context: Context, private val wifiSSID: String, pri
         }
         Log.i("Connection","Registering connection receiver...")
         context.registerReceiver(receiver, intentFilter)
-        addNetwork()
+        addNetwork(type)
     }
 
     // 新しいWiFiに接続できたかどうか判定するためにBroadcastReceiverを登録し、addNetworkへ
-    fun connect(callback: () -> Unit?) {
+    fun connect(callback: () -> Unit? , type: String) {
         Log.i("Connection", "connect")
         val intentFilter = IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION)
         val receiver = object : BroadcastReceiver() {
@@ -53,16 +53,27 @@ class Connection(private val context: Context, private val wifiSSID: String, pri
         }
         Log.i("Connection","Registering connection receiver...")
         context.registerReceiver(receiver, intentFilter)
-        addNetwork()
+        addNetwork(type)
     }
 
     // 新しいWiFiの情報を入れ、接続する
-    private fun addNetwork() {
+    private fun addNetwork(type:String) {
         Log.i("Connection","Connecting to ${wifiSSID}...")
         val wc = WifiConfiguration()
         wc.SSID = "\"" + wifiSSID + "\""
-        wc.preSharedKey = "\"" + wifiPassword + "\""
-        wc.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK)
+
+        if(wifiPassword != "") {
+            wc.preSharedKey = "\"" + wifiPassword + "\""
+        }
+
+        if(type == "internet") {
+            wc.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK)
+        }else {
+            wc.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
+            wc.allowedGroupCiphers.set(WifiConfiguration.AuthAlgorithm.OPEN);
+            wc.allowedGroupCiphers.set(WifiConfiguration.AuthAlgorithm.SHARED);
+        }
+
         val netId = wifiManager.addNetwork(wc)
         if (netId != -1) {
             if (!wifiManager.enableNetwork(netId, true)) {

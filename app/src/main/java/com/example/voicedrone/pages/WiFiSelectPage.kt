@@ -118,7 +118,7 @@ class WiFiSelectPage : AppCompatActivity() {
 
                 val wiFiConnected: (Intent) -> Unit = {activityIntent -> startActivity(activityIntent)}
                 val connection = Connection(this, WiFiData.internetWiFiID, WiFiData.internetWiFiPass)
-                connection.connect{wiFiConnected(intent)}
+                connection.connect({wiFiConnected(intent)},"internet")
 
                 Thread{
                     wifiScanTimer?.cancel()

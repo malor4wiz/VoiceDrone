@@ -35,7 +35,7 @@ class RecordResultPage : AppCompatActivity() {
 
         val connection = Connection(this, WiFiData.droneWiFiID, WiFiData.droneWiFiPass)
         connection.disable()
-        connection.connect()
+        connection.connect("drone")
 
         if (rightRecognitionRate != null && leftRecognitionRate != null) {
             val rightRecognitnionRateFloat = rightRecognitionRate.toFloat()
@@ -117,7 +117,7 @@ class RecordResultPage : AppCompatActivity() {
         val wiFiConnected: (Intent) -> Unit = {activityIntent -> startActivity(activityIntent)}
         val connection = Connection(this, WiFiData.internetWiFiID, WiFiData.internetWiFiPass)
         connection.disable()
-        connection.connect{wiFiConnected(intent)}
+        connection.connect({wiFiConnected(intent)},"internet")
     }
 
     fun onClickTouchButton(view: View?) {

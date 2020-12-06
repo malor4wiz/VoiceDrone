@@ -1,6 +1,7 @@
 package com.example.voicedrone.pages
 
 import android.Manifest
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.media.AudioFormat
@@ -27,18 +28,22 @@ import java.util.*
 class RecordPage : AppCompatActivity() {
     private val PERMISSIONS_REQUEST_CODE_RECORD_AUDIO = 1
     private val PERMISSIONS_REQUEST_CODE_WRITE_EXTERNAL_STORAGE = 2
+    private val PERMISSIONS_REQUEST_CODE_READ_EXTERNAL_STORAGE = 3
 
     var audioRecord : AudioRecord? = null
     private val SAMPLING_RATE = 16000
     private var bufSize = 0
     private var shortData: ShortArray? = null
     private val wav1 = MyWaveFile()
-    private val fileName = Environment.getExternalStorageDirectory().path + "/voice_drone/indication.wav"
+   // private val fileName = Environment.getExternalStorageDirectory().path + "/voice_drone/indication.wav"
+    private var fileName = ""
 
     var recordFlag = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        fileName = applicationContext.filesDir.toString() + "/indication.wav"
         setContentView(R.layout.record_page)
         // 既に許可されているか確認
         if (checkSelfPermission(Manifest.permission.RECORD_AUDIO)
@@ -50,8 +55,10 @@ class RecordPage : AppCompatActivity() {
                     Manifest.permission.RECORD_AUDIO
                 ),
                 PERMISSIONS_REQUEST_CODE_RECORD_AUDIO);
-            return;
+        }else{
+            initAudioRecord()
         }
+        /*
         // 既に許可されているか確認
         if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
             != PackageManager.PERMISSION_GRANTED) {
@@ -62,9 +69,23 @@ class RecordPage : AppCompatActivity() {
                     Manifest.permission.WRITE_EXTERNAL_STORAGE
                 ),
                 PERMISSIONS_REQUEST_CODE_WRITE_EXTERNAL_STORAGE);
-            return;
         }
-        initAudioRecord()
+        */
+
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        when (requestCode) {
+            1 -> {
+                for (i: Int in permissions.indices) {
+                    if ((permissions[i] == Manifest.permission.RECORD_AUDIO) && (grantResults[i] == PackageManager.PERMISSION_GRANTED)) {
+                        //許可されてデバイスがここでわかるので何らかの処理をする
+                        initAudioRecord()
+                    }
+                }
+            }
+        }
     }
 
     fun onClickRecordButton(v: View?) {

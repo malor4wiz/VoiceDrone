@@ -1,10 +1,7 @@
 package com.example.voicedrone
 
 import android.util.Log
-import java.io.File
-import java.io.FileNotFoundException
-import java.io.IOException
-import java.io.RandomAccessFile
+import java.io.*
 
 class MyWaveFile {
     private val FILESIZE_SEEK = 4
