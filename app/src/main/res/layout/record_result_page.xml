@@ -92,15 +92,15 @@
         app:layout_constraintTop_toBottomOf="@+id/touchButton" />
 
     <Button
-        android:id="@+id/voiceButton"
+        android:id="@+id/backButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="136dp"
         android:layout_marginTop="36dp"
-        android:text="Voice"
+        android:text="Back"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/leftRecognition"
-        android:onClick="onClickVoiceButton"/>
+        android:onClick="onClickBackButton"/>
 
     <Button
         android:id="@+id/touchButton"
@@ -108,7 +108,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
         android:text="Touch"
-        app:layout_constraintStart_toStartOf="@+id/voiceButton"
-        app:layout_constraintTop_toBottomOf="@+id/voiceButton"
+        app:layout_constraintStart_toStartOf="@+id/backButton"
+        app:layout_constraintTop_toBottomOf="@+id/backButton"
         android:onClick="onClickTouchButton"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

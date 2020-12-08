@@ -25,45 +25,76 @@ import java.net.URL
 import java.util.*
 
 class RecordPage : AppCompatActivity() {
-    private val PERMISSIONS_REQUEST_CODE_RECORD_AUDIO = 1
-    private val PERMISSIONS_REQUEST_CODE_WRITE_EXTERNAL_STORAGE = 2
+    private val PERMISSIONS_REQUEST_CODE = 0
 
     var audioRecord : AudioRecord? = null
     private val SAMPLING_RATE = 16000
     private var bufSize = 0
     private var shortData: ShortArray? = null
     private val wav1 = MyWaveFile()
-    private val fileName = Environment.getExternalStorageDirectory().path + "/Music/indication.wav"
-    var recordFlag = false
+    private var fileName: String = ""
+    private var recordFlag = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.record_page)
-        // 既に許可されているか確認
-        if (checkSelfPermission(Manifest.permission.RECORD_AUDIO)
-            != PackageManager.PERMISSION_GRANTED) {
-            // 許可されていなかったらリクエストする
-            // ダイアログが表示される
+
+        // 権限チェック
+        if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED ||
+            checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
+        ) {
             requestPermissions(
-                arrayOf(
-                    Manifest.permission.RECORD_AUDIO
-                ),
-                PERMISSIONS_REQUEST_CODE_RECORD_AUDIO);
-            return;
+                arrayOf(Manifest.permission.RECORD_AUDIO,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE),
+                PERMISSIONS_REQUEST_CODE);
+        } else {
+            prepareAudioRecord()
         }
-        // 既に許可されているか確認
-        if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-            != PackageManager.PERMISSION_GRANTED) {
-            // 許可されていなかったらリクエストする
-            // ダイアログが表示される
-            requestPermissions(
-                arrayOf(
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE
-                ),
-                PERMISSIONS_REQUEST_CODE_WRITE_EXTERNAL_STORAGE);
-            return;
+
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+    }
+
+    // requestPermissions の後の処理
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String?>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == PERMISSIONS_REQUEST_CODE
+            && grantResults[0] == PackageManager.PERMISSION_GRANTED
+        ) {
+            prepareAudioRecord()
+        } else {
+            Toast.makeText(applicationContext, "permissionが許可されていません", Toast.LENGTH_SHORT).show()
         }
-        initAudioRecord()
+    }
+
+    private fun prepareAudioRecord() {
+        try {
+            // アプリ固有の外部ストレージを使用
+            val dir = File(
+                applicationContext.getExternalFilesDir(
+                    Environment.DIRECTORY_MUSIC)?.path
+            )
+            // フォルダ作成
+            if (!dir?.mkdirs()) {
+                Log.e("log", "Directory is not created")
+            }
+            if (dir != null) {
+                fileName = dir.absolutePath + "/indication.wav"
+                Log.d("log", "path: $fileName")
+                initAudioRecord()
+            }
+        } catch (e: Exception) {
+            Log.i("RecordPage", e.toString())
+            Toast.makeText(applicationContext, "音声ファイルの作成に失敗しました", Toast.LENGTH_SHORT).show()
+        }
+
     }
 
     fun onClickRecordButton(v: View?) {
@@ -77,6 +108,7 @@ class RecordPage : AppCompatActivity() {
             recordButton.text = "RECORD"
         }
         recordFlag = !recordFlag
+
     }
 
     //AudioRecordの初期化
@@ -116,7 +148,8 @@ class RecordPage : AppCompatActivity() {
             audioRecord!!.startRecording()
             audioRecord!!.read(shortData!!, 0, bufSize / 2)
         } catch (e: Exception) {
-            Toast.makeText(applicationContext, e.toString(), Toast.LENGTH_LONG).show()
+            Log.i("RecordPage", e.toString())
+            Toast.makeText(applicationContext, "録音開始時にエラーが発生しました", Toast.LENGTH_SHORT).show()
         }
 
     }
@@ -132,7 +165,8 @@ class RecordPage : AppCompatActivity() {
                 "http://35.200.72.132/speech"
             )
         } catch (e: IOException) {
-            e.printStackTrace()
+            Log.i("RecordPage", e.toString())
+            Toast.makeText(applicationContext, "録音終了時にエラーが発生しました", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -182,7 +216,8 @@ class RecordPage : AppCompatActivity() {
                 `is`.close()
 
             } catch (e: IOException) {
-                e.printStackTrace()
+                Log.i("RecordPage", e.toString())
+                Toast.makeText(applicationContext, "音声データの送信に失敗しました", Toast.LENGTH_SHORT).show()
             } finally {
                 connection?.disconnect()
             }
@@ -204,7 +239,8 @@ class RecordPage : AppCompatActivity() {
 
                 startActivity(intent)
             } catch (Je : JSONException) {
-                Toast.makeText(applicationContext, Je.toString(), Toast.LENGTH_SHORT).show()
+                Log.i("RecordPage", Je.toString())
+                Toast.makeText(applicationContext, "音声データの解析結果取得に失敗しました", Toast.LENGTH_SHORT).show()
             }
         }
     }

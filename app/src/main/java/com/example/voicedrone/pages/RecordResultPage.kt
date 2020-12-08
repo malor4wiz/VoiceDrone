@@ -2,12 +2,14 @@ package com.example.voicedrone.pages
 
 import KTello
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import com.example.voicedrone.*
 
@@ -16,14 +18,14 @@ class RecordResultPage : AppCompatActivity() {
     private var orderIsRight = false
     private var orderValid = true
 
-    private var voiceButton: Button? = null
+    private var backButton: Button? = null
 
+    @RequiresApi(Build.VERSION_CODES.Q)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.record_result_page)
 
-        voiceButton = findViewById(R.id.voiceButton)
-        voiceButton?.isEnabled = false
+        backButton = findViewById(R.id.backButton)
 
         val intent = intent
         val voiceResult = findViewById<TextView>(R.id.voiceResult)
@@ -35,21 +37,19 @@ class RecordResultPage : AppCompatActivity() {
 
         val connection = Connection(this, WiFiData.droneWiFiID, WiFiData.droneWiFiPass)
         connection.disable()
-        connection.connect()
 
         if (rightRecognitionRate != null && leftRecognitionRate != null) {
-            val rightRecognitnionRateFloat = rightRecognitionRate.toFloat()
+            val rightRecognitionRateFloat = rightRecognitionRate.toFloat()
             when {
-                rightRecognitnionRateFloat > 0.6 -> {
+                rightRecognitionRateFloat > 0.6 -> {
                     Log.i("RecordResultPage", "orderIsRight is true")
                     orderIsRight = true
                 }
-                rightRecognitnionRateFloat > 0.4 -> {
+                rightRecognitionRateFloat > 0.4 -> {
                     Log.i("RecordResultPage", "orderValid is false")
                     orderValid = false
                     val yourOrderSentence = findViewById<TextView>(R.id.yourOrderSentence)
                     yourOrderSentence.text = "has Not been carrying out "
-                    voiceButton?.isEnabled = true
                 }
                 else -> {
                     Log.v("RecordResultPage", "orderIsRight is false")
@@ -57,12 +57,15 @@ class RecordResultPage : AppCompatActivity() {
             }
 
             voiceResult.text = intent.getStringExtra("result")
-            rightRecognition.text = rightRecognitionRate + "%"
-            leftRecognition.text = leftRecognitionRate + "%"
+            rightRecognition.text = "$rightRecognitionRate%"
+            leftRecognition.text = "$leftRecognitionRate%"
         }
 
         if (orderValid) {
-            initTello()
+            connection.connect{
+                initTello()
+            }
+
         }
     }
 
@@ -95,19 +98,18 @@ class RecordResultPage : AppCompatActivity() {
                         Thread.sleep(2000)
                     }
                     tello?.land()
-                    runOnUiThread{
-                        voiceButton?.isEnabled = true
-                    }
                 }
             } catch (e: Exception) {
                 runOnUiThread{
-                    Toast.makeText(applicationContext, e.toString(), Toast.LENGTH_LONG).show()
+                    Log.i("RecordResultPage", e.toString())
+                    Toast.makeText(applicationContext, "Telloとの通信に失敗しました", Toast.LENGTH_SHORT).show()
                 }
             }
         }.start()
     }
 
-    fun onClickVoiceButton(view: View?) {
+    @RequiresApi(Build.VERSION_CODES.Q)
+    fun onClickBackButton(view: View?) {
         Thread{
             tello?.close()
         }.start()
