@@ -9,9 +9,3 @@
 ### ・開発環境
     AndroidStudio 4.0.1
     kotlin 1.3
-
-<br>
-
-### ・画面遷移図
-<br>
-<img src="./images/VoiceDrone_画面遷移.png" alt="画面遷移図pdf">
